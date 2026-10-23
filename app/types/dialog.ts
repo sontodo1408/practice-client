@@ -31,6 +31,8 @@ export interface ContentDialogOptions extends DialogBase {
   component: Component
   // Props passed to the child component
   props?: Record<string, unknown>
+  // Tailwind max-width class for the dialog, e.g. 'sm:max-w-4xl' (default size when omitted)
+  widthClass?: string
 }
 
 // Dialog entry kept in the stack (last item is the top-most dialog)

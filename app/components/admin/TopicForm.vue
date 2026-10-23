@@ -24,10 +24,10 @@ watch(() => state.name, (name) => {
 
 function validate(values: Partial<typeof state>): FormError[] {
   const errors: FormError[] = []
-  if (!values.name?.trim()) errors.push({ name: 'name', message: 'Name is required' })
-  if (!values.slug?.trim()) errors.push({ name: 'slug', message: 'Slug is required' })
+  if (!values.name?.trim()) errors.push({ name: 'name', message: 'Vui lòng nhập tên' })
+  if (!values.slug?.trim()) errors.push({ name: 'slug', message: 'Vui lòng nhập slug' })
   else if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(values.slug)) {
-    errors.push({ name: 'slug', message: 'Use lowercase letters, numbers and dashes only' })
+    errors.push({ name: 'slug', message: 'Chỉ dùng chữ thường không dấu, số và dấu gạch ngang' })
   }
   return errors
 }
@@ -56,25 +56,25 @@ async function onSubmit(event: FormSubmitEvent<typeof state>) {
 
 <template>
   <UForm :state="state" :validate="validate" class="space-y-4" @submit="onSubmit">
-    <UFormField label="Name" name="name" required>
-      <UInput v-model="state.name" class="w-full" autofocus placeholder="e.g. Algebra" />
+    <UFormField label="Tên" name="name" required>
+      <UInput v-model="state.name" class="w-full" autofocus placeholder="VD: Đại số" />
     </UFormField>
 
-    <UFormField label="Slug" name="slug" required help="Unique within the subject; generated from the name by default.">
-      <UInput v-model="state.slug" class="w-full" placeholder="e.g. algebra" @input="slugTouched = true" />
+    <UFormField label="Slug" name="slug" required help="Duy nhất trong môn học; mặc định được tạo từ tên.">
+      <UInput v-model="state.slug" class="w-full" placeholder="VD: dai-so" @input="slugTouched = true" />
     </UFormField>
 
-    <UFormField label="Description" name="description">
-      <UTextarea v-model="state.description" class="w-full" :rows="4" placeholder="Optional short description" />
+    <UFormField label="Mô tả" name="description">
+      <UTextarea v-model="state.description" class="w-full" :rows="4" placeholder="Mô tả ngắn (không bắt buộc)" />
     </UFormField>
 
     <!-- Right-aligned actions -->
     <div class="flex justify-end gap-2 pt-2">
       <UButton color="neutral" variant="outline" class="transition duration-200 active:scale-95" @click="emit('close')">
-        Cancel
+        Hủy
       </UButton>
       <UButton type="submit" :loading="loading" class="transition duration-200 active:scale-95">
-        {{ topic ? 'Save changes' : 'Create topic' }}
+        {{ topic ? 'Lưu thay đổi' : 'Tạo chủ đề' }}
       </UButton>
     </div>
   </UForm>

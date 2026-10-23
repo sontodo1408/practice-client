@@ -6,7 +6,7 @@ import AdminTopicForm from '~/components/admin/TopicForm.vue'
 
 // Admin topic management: subjects as expandable cards, topics inside as drag-sortable rows
 definePageMeta({ layout: 'admin' })
-useSeoMeta({ title: 'Topics' })
+useSeoMeta({ title: 'Chủ đề' })
 
 const subjectApi = useSubjectApi()
 const topicApi = useTopicApi()
@@ -45,7 +45,7 @@ function reload() {
 async function addTopic(subject: Subject) {
   const nextOrder = topicsOf(subject.id).reduce((max, t) => Math.max(max, t.displayOrder ?? 0), 0) + 1
   const saved = await dialogStore.content<boolean>({
-    title: `New topic in ${subject.name}`,
+    title: `Chủ đề mới trong ${subject.name}`,
     component: AdminTopicForm,
     props: { subjectId: subject.id, nextOrder }
   })
@@ -54,7 +54,7 @@ async function addTopic(subject: Subject) {
 
 async function editTopic(topic: Topic) {
   const saved = await dialogStore.content<boolean>({
-    title: 'Edit topic',
+    title: 'Sửa chủ đề',
     component: AdminTopicForm,
     props: { subjectId: topic.subjectId, topic }
   })
@@ -63,9 +63,9 @@ async function editTopic(topic: Topic) {
 
 async function removeTopic(topic: Topic) {
   const ok = await dialogStore.confirm({
-    title: 'Delete topic',
-    description: `Delete "${topic.name}"? This action cannot be undone.`,
-    confirmText: 'Delete',
+    title: 'Xóa chủ đề',
+    description: `Bạn có chắc muốn xóa "${topic.name}"? Hành động này không thể hoàn tác.`,
+    confirmText: 'Xóa',
     confirmColor: 'error'
   })
   if (!ok) return
@@ -99,10 +99,10 @@ async function reorder(subjectId: number, ids: number[]) {
     <!-- Page header -->
     <div class="motion-safe:animate-fade-up">
       <h1 class="text-2xl font-bold text-highlighted">
-        Topics
+        Chủ đề
       </h1>
       <p class="text-sm text-muted">
-        Expand a subject to manage its topics. Drag the grip handle to change the display order.
+        Mở rộng một môn học để quản lý các chủ đề. Kéo biểu tượng tay cầm để thay đổi thứ tự hiển thị.
       </p>
     </div>
 
@@ -112,8 +112,8 @@ async function reorder(subjectId: number, ids: number[]) {
       color="error"
       variant="subtle"
       icon="i-lucide-circle-alert"
-      title="Could not load topics"
-      :actions="[{ label: 'Retry', color: 'error', variant: 'outline', onClick: () => reload() }]"
+      title="Không thể tải danh sách chủ đề"
+      :actions="[{ label: 'Thử lại', color: 'error', variant: 'outline', onClick: () => reload() }]"
     />
 
     <!-- Client-only: data is fetched in the browser, so SSR output could never match -->
@@ -149,10 +149,10 @@ async function reorder(subjectId: number, ids: number[]) {
       <div v-else class="flex flex-col items-center gap-3 py-16 text-center">
         <UIcon name="i-lucide-inbox" class="size-10 text-dimmed" />
         <p class="text-sm text-muted">
-          No subjects yet. Create a subject first, then add topics to it.
+          Chưa có môn học nào. Hãy tạo môn học trước, sau đó thêm chủ đề vào môn học.
         </p>
         <UButton to="/admin/subject" variant="soft" icon="i-lucide-book-open">
-          Go to subjects
+          Đến trang môn học
         </UButton>
       </div>
     </ClientOnly>

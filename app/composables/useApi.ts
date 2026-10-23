@@ -31,7 +31,7 @@ export function useApi() {
 
   // Show the backend message in the error dialog (unless silenced) and abort the caller's flow
   function fail(code: number, msg: string | null | undefined, options: ApiOptions): never {
-    const message = msg || 'Unexpected error, please try again.'
+    const message = msg || 'Đã xảy ra lỗi không mong muốn, vui lòng thử lại.'
     const isAuthError = (code === 401 || code === 403) && !options.skipAuthRedirect
     const redirect = isAuthError ? redirectToLogin() : 'skipped'
     // Parallel requests failing together show a single dialog
@@ -58,7 +58,7 @@ export function useApi() {
     } catch (e) {
       // Non-2xx HTTP responses still carry a ResponseApi body (400/401/403/404...)
       const err = e as { statusCode?: number, data?: Partial<ResponseApi<unknown>> }
-      return fail(err.data?.code ?? err.statusCode ?? 0, err.data?.msg ?? 'Unable to reach the server.', options)
+      return fail(err.data?.code ?? err.statusCode ?? 0, err.data?.msg ?? 'Không thể kết nối đến máy chủ.', options)
     } finally {
       appStore.stopLoading()
     }

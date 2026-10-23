@@ -4,7 +4,7 @@ import type { LoginPayload } from '~/types/auth'
 
 // Use the centered auth layout
 definePageMeta({ layout: 'auth' })
-useSeoMeta({ title: 'Sign in' })
+useSeoMeta({ title: 'Đăng nhập' })
 
 const { login } = useAuth()
 const route = useRoute()
@@ -15,10 +15,10 @@ const state = reactive<LoginPayload>({ username: '', password: '' })
 function validate(values: Partial<LoginPayload>): FormError[] {
   const errors: FormError[] = []
   if (!values.username?.trim()) {
-    errors.push({ name: 'username', message: 'Please enter your username' })
+    errors.push({ name: 'username', message: 'Vui lòng nhập tên đăng nhập' })
   }
   if (!values.password) {
-    errors.push({ name: 'password', message: 'Please enter your password' })
+    errors.push({ name: 'password', message: 'Vui lòng nhập mật khẩu' })
   }
   return errors
 }
@@ -62,24 +62,24 @@ async function onSubmit(event: FormSubmitEvent<LoginPayload>) {
     <div class="mb-6 text-center">
       <img
         src="/logo.png"
-        alt="Company logo"
+        alt="Logo công ty"
         class="mx-auto mb-4 size-16 drop-shadow-lg transition-transform duration-200 hover:scale-105"
       >
       <h1 class="text-2xl font-bold text-highlighted">
-        Welcome back
+        Chào mừng trở lại
       </h1>
       <p class="mt-1 text-sm text-muted">
-        Sign in to continue to your account
+        Đăng nhập để tiếp tục vào tài khoản của bạn
       </p>
     </div>
 
     <UCard class="shadow-xl" :ui="{ body: 'p-6 sm:p-8' }">
       <!-- Login form with inline validation -->
       <UForm :validate="validate" :state="state" class="space-y-5" @submit="onSubmit">
-        <UFormField label="Username" name="username"class="motion-safe:animate-fade-up" style="--index: 1">
+        <UFormField label="Tên đăng nhập" name="username" class="motion-safe:animate-fade-up" style="--index: 1">
           <UInput
             v-model="state.username"
-            placeholder="Your username"
+            placeholder="Nhập tên đăng nhập"
             icon="i-lucide-user"
             autocomplete="username"
             size="lg"
@@ -87,7 +87,7 @@ async function onSubmit(event: FormSubmitEvent<LoginPayload>) {
           />
         </UFormField>
 
-        <UFormField label="Password" name="password" class="motion-safe:animate-fade-up" style="--index: 2">
+        <UFormField label="Mật khẩu" name="password" class="motion-safe:animate-fade-up" style="--index: 2">
           <UInput
             v-model="state.password"
             :type="showPassword ? 'text' : 'password'"
@@ -105,7 +105,7 @@ async function onSubmit(event: FormSubmitEvent<LoginPayload>) {
                 variant="link"
                 size="sm"
                 :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
-                :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                :aria-label="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
                 @click="showPassword = !showPassword"
               />
             </template>
@@ -122,7 +122,7 @@ async function onSubmit(event: FormSubmitEvent<LoginPayload>) {
           class="motion-safe:animate-fade-up transition duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-95"
           style="--index: 3"
         >
-          Sign in
+          Đăng nhập
         </UButton>
       </UForm>
     </UCard>

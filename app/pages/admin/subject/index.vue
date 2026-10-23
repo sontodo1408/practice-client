@@ -6,7 +6,7 @@ import AdminSubjectForm from '~/components/admin/SubjectForm.vue'
 
 // Admin subject management: searchable, paginated table with create / edit / delete
 definePageMeta({ layout: 'admin' })
-useSeoMeta({ title: 'Subjects' })
+useSeoMeta({ title: 'Môn học' })
 
 const subjectApi = useSubjectApi()
 const dialogStore = useDialogStore()
@@ -45,10 +45,10 @@ watch(filtered, (rows) => {
 })
 
 const columns: TableColumn<Subject>[] = [
-  { accessorKey: 'name', header: 'Name' },
+  { accessorKey: 'name', header: 'Tên' },
   { accessorKey: 'slug', header: 'Slug' },
-  { accessorKey: 'description', header: 'Description' },
-  { accessorKey: 'updatedAt', header: 'Updated' },
+  { accessorKey: 'description', header: 'Mô tả' },
+  { accessorKey: 'updatedAt', header: 'Cập nhật' },
   { id: 'actions', header: '' }
 ]
 
@@ -56,7 +56,7 @@ const columns: TableColumn<Subject>[] = [
 // Open the create/edit form in the global content dialog; reload the list if something was saved
 async function openForm(subject?: Subject) {
   const saved = await dialogStore.content<boolean>({
-    title: subject ? 'Edit subject' : 'New subject',
+    title: subject ? 'Sửa môn học' : 'Môn học mới',
     component: AdminSubjectForm,
     props: { subject }
   })
@@ -66,9 +66,9 @@ async function openForm(subject?: Subject) {
 // Ask for confirmation, then delete; API errors are shown by the global dialog
 async function removeSubject(subject: Subject) {
   const ok = await dialogStore.confirm({
-    title: 'Delete subject',
-    description: `Delete "${subject.name}"? This action cannot be undone.`,
-    confirmText: 'Delete',
+    title: 'Xóa môn học',
+    description: `Bạn có chắc muốn xóa "${subject.name}"? Hành động này không thể hoàn tác.`,
+    confirmText: 'Xóa',
     confirmColor: 'error'
   })
   if (!ok) return
@@ -87,14 +87,14 @@ async function removeSubject(subject: Subject) {
     <div class="motion-safe:animate-fade-up flex flex-wrap items-center justify-between gap-3">
       <div>
         <h1 class="text-2xl font-bold text-highlighted">
-          Subjects
+          Môn học
         </h1>
         <p class="text-sm text-muted">
-          Manage the subjects learners can practice.
+          Quản lý các môn học mà người học có thể luyện tập.
         </p>
       </div>
       <UButton icon="i-lucide-plus" class="transition duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-95" @click="openForm()">
-        New subject
+        Môn học mới
       </UButton>
     </div>
 
@@ -105,15 +105,15 @@ async function removeSubject(subject: Subject) {
         <UInput
           v-model="search"
           icon="i-lucide-search"
-          placeholder="Search by name, slug or description"
+          placeholder="Tìm theo tên, slug hoặc mô tả"
           class="w-full sm:max-w-sm"
-          aria-label="Search subjects"
+          aria-label="Tìm kiếm môn học"
         >
           <template v-if="search" #trailing>
-            <UButton icon="i-lucide-x" color="neutral" variant="link" size="xs" aria-label="Clear search" @click="search = ''" />
+            <UButton icon="i-lucide-x" color="neutral" variant="link" size="xs" aria-label="Xóa tìm kiếm" @click="search = ''" />
           </template>
         </UInput>
-        <span class="text-sm text-muted">{{ filtered.length }} subject{{ filtered.length === 1 ? '' : 's' }}</span>
+        <span class="text-sm text-muted">{{ filtered.length }} môn học</span>
       </div>
 
       <!-- Load error with retry -->
@@ -123,8 +123,8 @@ async function removeSubject(subject: Subject) {
         color="error"
         variant="subtle"
         icon="i-lucide-circle-alert"
-        title="Could not load subjects"
-        :actions="[{ label: 'Retry', color: 'error', variant: 'outline', onClick: () => refresh() }]"
+        title="Không thể tải danh sách môn học"
+        :actions="[{ label: 'Thử lại', color: 'error', variant: 'outline', onClick: () => refresh() }]"
       />
 
       <!-- Table is client-only: its data is fetched in the browser, so SSR output could never match
@@ -161,7 +161,7 @@ async function removeSubject(subject: Subject) {
               icon="i-lucide-pencil"
               color="neutral"
               variant="ghost"
-              :aria-label="`Edit ${row.original.name}`"
+              :aria-label="`Sửa ${row.original.name}`"
               class="transition duration-200 active:scale-95"
               @click="openForm(row.original)"
             />
@@ -169,7 +169,7 @@ async function removeSubject(subject: Subject) {
               icon="i-lucide-trash-2"
               color="error"
               variant="ghost"
-              :aria-label="`Delete ${row.original.name}`"
+              :aria-label="`Xóa ${row.original.name}`"
               class="transition duration-200 active:scale-95"
               @click="removeSubject(row.original)"
             />
@@ -181,10 +181,10 @@ async function removeSubject(subject: Subject) {
           <div class="flex flex-col items-center gap-3 py-10 text-center">
             <UIcon name="i-lucide-inbox" class="size-10 text-dimmed" />
             <p class="text-sm text-muted">
-              {{ search ? 'No subjects match your search.' : 'No subjects yet. Create your first one.' }}
+              {{ search ? 'Không có môn học nào khớp với tìm kiếm.' : 'Chưa có môn học nào. Hãy tạo môn học đầu tiên.' }}
             </p>
             <UButton v-if="!search" icon="i-lucide-plus" variant="soft" @click="openForm()">
-              New subject
+              Môn học mới
             </UButton>
           </div>
         </template>

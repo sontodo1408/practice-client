@@ -4,7 +4,7 @@ import type { AIType, Setting, SettingPayload } from '~/types/setting'
 
 // Admin settings: configure the AI provider, model, API key and bean (usage credit) limits
 definePageMeta({ layout: 'admin' })
-useSeoMeta({ title: 'Settings' })
+useSeoMeta({ title: 'Cài đặt' })
 
 const settingApi = useSettingApi()
 
@@ -58,15 +58,15 @@ async function loadModels() {
   const key = state.apiKey.trim()
   if (!key) {
     // The stored key is masked by the backend, so a fresh key must be entered to query the provider
-    toast.add({ title: 'Enter the API key first', description: 'The stored key is hidden, paste it to load models.', color: 'warning', icon: 'i-lucide-key-round' })
+    toast.add({ title: 'Vui lòng nhập API key trước', description: 'Key đã lưu được ẩn, hãy dán key để tải danh sách model.', color: 'warning', icon: 'i-lucide-key-round' })
     return
   }
   loadingModels.value = true
   try {
     models.value = await listModels(state.aiType, key)
-    toast.add({ title: `Loaded ${models.value.length} models`, color: 'success', icon: 'i-lucide-check-circle' })
+    toast.add({ title: `Đã tải ${models.value.length} model`, color: 'success', icon: 'i-lucide-check-circle' })
   } catch {
-    toast.add({ title: 'Could not load models', description: 'Check the provider and API key.', color: 'error', icon: 'i-lucide-circle-alert' })
+    toast.add({ title: 'Không thể tải danh sách model', description: 'Hãy kiểm tra nhà cung cấp và API key.', color: 'error', icon: 'i-lucide-circle-alert' })
   } finally {
     loadingModels.value = false
   }
@@ -89,15 +89,15 @@ watch(setting, (value) => {
 
 function validate(values: Partial<SettingPayload>): FormError[] {
   const errors: FormError[] = []
-  if (!values.aiType) errors.push({ name: 'aiType', message: 'AI provider is required' })
-  if (!values.aiModel?.trim()) errors.push({ name: 'aiModel', message: 'Model is required' })
+  if (!values.aiType) errors.push({ name: 'aiType', message: 'Vui lòng chọn nhà cung cấp AI' })
+  if (!values.aiModel?.trim()) errors.push({ name: 'aiModel', message: 'Vui lòng nhập model' })
   // A key is mandatory only for the very first configuration
-  if (!setting.value && !values.apiKey?.trim()) errors.push({ name: 'apiKey', message: 'API key is required' })
+  if (!setting.value && !values.apiKey?.trim()) errors.push({ name: 'apiKey', message: 'Vui lòng nhập API key' })
   if (values.dailyBeanLimit == null || !Number.isInteger(values.dailyBeanLimit) || values.dailyBeanLimit < 0) {
-    errors.push({ name: 'dailyBeanLimit', message: 'Enter a whole number, 0 or greater' })
+    errors.push({ name: 'dailyBeanLimit', message: 'Nhập số nguyên lớn hơn hoặc bằng 0' })
   }
   if (values.beanPerQuestion == null || !Number.isInteger(values.beanPerQuestion) || values.beanPerQuestion < 0) {
-    errors.push({ name: 'beanPerQuestion', message: 'Enter a whole number, 0 or greater' })
+    errors.push({ name: 'beanPerQuestion', message: 'Nhập số nguyên lớn hơn hoặc bằng 0' })
   }
   return errors
 }
@@ -128,10 +128,10 @@ function reset() {
     <!-- Page header -->
     <div class="motion-safe:animate-fade-up">
       <h1 class="text-2xl font-bold text-highlighted">
-        Settings
+        Cài đặt
       </h1>
       <p class="text-sm text-muted">
-        Configure the AI provider and the bean limits used for question generation.
+        Cấu hình nhà cung cấp AI và giới hạn bean dùng để tạo câu hỏi.
       </p>
     </div>
 
@@ -154,7 +154,7 @@ function reset() {
         <template #header>
           <div class="flex items-center gap-2 font-semibold text-highlighted">
             <UIcon name="i-lucide-sparkles" class="size-5 text-primary" />
-            AI provider
+            Nhà cung cấp AI
           </div>
         </template>
 
@@ -165,25 +165,25 @@ function reset() {
             color="warning"
             variant="subtle"
             icon="i-lucide-triangle-alert"
-            title="Not configured yet"
-            description="Fill in the form and save to create the first setting."
+            title="Chưa được cấu hình"
+            description="Điền vào biểu mẫu và lưu để tạo cài đặt đầu tiên."
           />
 
           <div class="grid gap-4 sm:grid-cols-2">
-            <UFormField label="Provider" name="aiType" required>
+            <UFormField label="Nhà cung cấp" name="aiType" required>
               <USelect v-model="state.aiType" :items="aiTypeItems" value-key="value" class="w-full" />
             </UFormField>
             <UFormField label="Model" name="aiModel" required>
               <!-- Free text with native suggestions (datalist) filled by the download button -->
               <div class="flex gap-2">
-                <UInput v-model="state.aiModel" class="w-full" list="ai-model-options" placeholder="e.g. gemini-2.5-flash" />
-                <UTooltip text="Download available models">
+                <UInput v-model="state.aiModel" class="w-full" list="ai-model-options" placeholder="VD: gemini-2.5-flash" />
+                <UTooltip text="Tải danh sách model khả dụng">
                   <UButton
                     icon="i-lucide-download"
                     color="neutral"
                     variant="outline"
                     :loading="loadingModels"
-                    aria-label="Download available models"
+                    aria-label="Tải danh sách model khả dụng"
                     class="transition duration-200 active:scale-95"
                     @click="loadModels"
                   />
@@ -199,14 +199,14 @@ function reset() {
             label="API key"
             name="apiKey"
             :required="!setting"
-            :help="setting?.apiKeyMasked ? `Current key: ${setting.apiKeyMasked}. Leave empty to keep it.` : 'Stored encrypted on the server.'"
+            :help="setting?.apiKeyMasked ? `Key hiện tại: ${setting.apiKeyMasked}. Để trống để giữ nguyên.` : 'Được lưu mã hóa trên máy chủ.'"
           >
             <UInput
               v-model="state.apiKey"
               class="w-full"
               :type="showKey ? 'text' : 'password'"
               autocomplete="off"
-              placeholder="Paste a new API key"
+              placeholder="Dán API key mới"
             >
               <template #trailing>
                 <UButton
@@ -214,7 +214,7 @@ function reset() {
                   color="neutral"
                   variant="link"
                   size="xs"
-                  :aria-label="showKey ? 'Hide API key' : 'Show API key'"
+                  :aria-label="showKey ? 'Ẩn API key' : 'Hiện API key'"
                   @click="showKey = !showKey"
                 />
               </template>
@@ -228,15 +228,15 @@ function reset() {
         <template #header>
           <div class="flex items-center gap-2 font-semibold text-highlighted">
             <UIcon name="i-lucide-coins" class="size-5 text-primary" />
-            Bean limits
+            Giới hạn bean
           </div>
         </template>
 
         <div class="space-y-4">
-          <UFormField label="Daily bean limit" name="dailyBeanLimit" required help="Max beans a user can spend per day.">
+          <UFormField label="Giới hạn bean mỗi ngày" name="dailyBeanLimit" required help="Số bean tối đa mỗi người dùng có thể dùng trong một ngày.">
             <UInputNumber v-model="state.dailyBeanLimit" :min="0" class="w-full" />
           </UFormField>
-          <UFormField label="Beans per question" name="beanPerQuestion" required help="Cost of generating one question.">
+          <UFormField label="Bean mỗi câu hỏi" name="beanPerQuestion" required help="Chi phí để tạo một câu hỏi.">
             <UInputNumber v-model="state.beanPerQuestion" :min="0" class="w-full" />
           </UFormField>
         </div>
@@ -245,11 +245,11 @@ function reset() {
       <!-- Footer: last update time and actions -->
       <div class="motion-safe:animate-fade-up flex flex-wrap items-center justify-between gap-3 lg:col-span-3" style="--index: 3">
         <span class="text-sm text-muted">
-          <template v-if="setting">Last updated {{ formatDateTime(setting.updatedAt) }}</template>
+          <template v-if="setting">Cập nhật lần cuối {{ formatDateTime(setting.updatedAt) }}</template>
         </span>
         <div class="flex gap-2">
           <UButton color="neutral" variant="outline" class="transition duration-200 active:scale-95" @click="reset">
-            Reset
+            Đặt lại
           </UButton>
           <UButton
             type="submit"
@@ -257,7 +257,7 @@ function reset() {
             :loading="saving"
             class="transition duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-95"
           >
-            Save settings
+            Lưu cài đặt
           </UButton>
         </div>
       </div>

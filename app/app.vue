@@ -12,7 +12,7 @@ const appStore = useAppStore()
       <UProgress
         v-if="appStore.isLoading"
         size="xs"
-        aria-label="Loading"
+        aria-label="Đang tải"
         class="fixed inset-x-0 top-0 z-[100]"
       />
     </Transition>

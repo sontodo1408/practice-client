@@ -17,7 +17,7 @@ function onOpenChange(id: number, open: boolean) {
     :open="true"
     :title="dialog.title"
     :close="false"
-    :ui="{ header: 'border-b border-default' }"
+    :ui="{ header: 'border-b border-default', content: dialog.type === 'content' ? dialog.widthClass : undefined }"
     @update:open="onOpenChange(dialog.id, $event)"
   >
     <!-- "content" dialogs: only the child component (it emits "close" with a result) -->
@@ -40,7 +40,7 @@ function onOpenChange(id: number, open: boolean) {
     <template v-if="dialog.type === 'message'" #footer>
       <div class="flex w-full justify-end">
         <UButton class="transition duration-200 active:scale-95" @click="dialogStore.close(dialog.id)">
-          {{ dialog.closeText ?? 'Close' }}
+          {{ dialog.closeText ?? 'Đóng' }}
         </UButton>
       </div>
     </template>
@@ -54,14 +54,14 @@ function onOpenChange(id: number, open: boolean) {
           class="transition duration-200 active:scale-95"
           @click="dialogStore.close(dialog.id, false)"
         >
-          {{ dialog.cancelText ?? 'Cancel' }}
+          {{ dialog.cancelText ?? 'Hủy' }}
         </UButton>
         <UButton
           :color="dialog.confirmColor ?? 'primary'"
           class="transition duration-200 active:scale-95"
           @click="dialogStore.close(dialog.id, true)"
         >
-          {{ dialog.confirmText ?? 'Confirm' }}
+          {{ dialog.confirmText ?? 'Xác nhận' }}
         </UButton>
       </div>
     </template>

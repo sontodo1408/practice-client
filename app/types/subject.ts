@@ -4,6 +4,7 @@ export interface Subject {
   name: string
   slug: string
   description: string | null
+  imgBanner: string | null
   // ISO-8601 instants
   createdAt: string
   updatedAt: string
@@ -14,4 +15,5 @@ export interface SubjectPayload {
   name: string
   slug: string
   description: string
+  imgBanner: string | null
 }

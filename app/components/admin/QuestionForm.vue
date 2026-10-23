@@ -9,9 +9,9 @@ const emit = defineEmits<{ close: [saved?: boolean] }>()
 const questionApi = useQuestionApi()
 
 const difficultyItems: { label: string, value: Difficulty }[] = [
-  { label: 'Easy', value: 'EASY' },
-  { label: 'Medium', value: 'MEDIUM' },
-  { label: 'Hard', value: 'HARD' }
+  { label: 'Dễ', value: 'EASY' },
+  { label: 'Trung bình', value: 'MEDIUM' },
+  { label: 'Khó', value: 'HARD' }
 ]
 
 const state = reactive({
@@ -24,8 +24,8 @@ const loading = ref(false)
 
 function validate(values: Partial<typeof state>): FormError[] {
   const errors: FormError[] = []
-  if (!values.title?.trim()) errors.push({ name: 'title', message: 'Title is required' })
-  if (!values.question?.trim()) errors.push({ name: 'question', message: 'Question is required' })
+  if (!values.title?.trim()) errors.push({ name: 'title', message: 'Vui lòng nhập tiêu đề' })
+  if (!values.question?.trim()) errors.push({ name: 'question', message: 'Vui lòng nhập câu hỏi' })
   return errors
 }
 
@@ -51,29 +51,29 @@ async function onSubmit(event: FormSubmitEvent<typeof state>) {
 
 <template>
   <UForm :state="state" :validate="validate" class="space-y-4" @submit="onSubmit">
-    <UFormField label="Title" name="title" required>
+    <UFormField label="Tiêu đề" name="title" required>
       <UInput v-model="state.title" class="w-full" autofocus />
     </UFormField>
 
-    <UFormField label="Difficulty" name="difficulty">
+    <UFormField label="Độ khó" name="difficulty">
       <USelect v-model="state.difficulty" :items="difficultyItems" class="w-full" />
     </UFormField>
 
-    <UFormField label="Question" name="question" required>
+    <UFormField label="Câu hỏi" name="question" required>
       <UTextarea v-model="state.question" class="w-full" :rows="5" />
     </UFormField>
 
-    <UFormField label="Answer" name="answer">
+    <UFormField label="Đáp án" name="answer">
       <UTextarea v-model="state.answer" class="w-full" :rows="5" />
     </UFormField>
 
     <!-- Right-aligned actions -->
     <div class="flex justify-end gap-2 pt-2">
       <UButton color="neutral" variant="outline" class="transition duration-200 active:scale-95" @click="emit('close')">
-        Cancel
+        Hủy
       </UButton>
       <UButton type="submit" :loading="loading" class="transition duration-200 active:scale-95">
-        Save changes
+        Lưu thay đổi
       </UButton>
     </div>
   </UForm>

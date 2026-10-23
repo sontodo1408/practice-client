@@ -19,7 +19,7 @@ const userLabel = computed(() => {
 const userMenu = computed(() => [
   [{ label: userLabel.value, type: 'label' as const }],
   [{
-    label: 'Sign out',
+    label: 'Đăng xuất',
     icon: 'i-lucide-log-out',
     onSelect: async () => {
       // Logout failures are shown by the global dialog; stay on the page in that case
@@ -46,8 +46,8 @@ const userMenu = computed(() => [
     <USlideover
       v-model:open="mobileNavOpen"
       side="left"
-      title="Navigation"
-      description="Admin navigation menu"
+      title="Điều hướng"
+      description="Menu điều hướng quản trị"
       :ui="{ content: 'max-w-64', header: 'sr-only' }"
     >
       <template #body>
@@ -63,7 +63,7 @@ const userMenu = computed(() => [
           icon="i-lucide-menu"
           color="neutral"
           variant="ghost"
-          aria-label="Open navigation"
+          aria-label="Mở menu điều hướng"
           @click="mobileNavOpen = true"
         />
         <div class="flex-1" />

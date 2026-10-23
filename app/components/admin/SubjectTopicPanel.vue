@@ -54,12 +54,12 @@ useSortableList(listEl, {
           <span class="block truncate text-sm text-muted">{{ subject.description || subject.slug }}</span>
         </span>
       </button>
-      <UBadge color="neutral" variant="subtle" :label="`${items.length} topic${items.length === 1 ? '' : 's'}`" />
-      <UTooltip text="Add topic">
+      <UBadge color="neutral" variant="subtle" :label="`${items.length} chủ đề`" />
+      <UTooltip text="Thêm chủ đề">
         <UButton
           icon="i-lucide-plus"
           variant="soft"
-          :aria-label="`Add topic to ${subject.name}`"
+          :aria-label="`Thêm chủ đề vào ${subject.name}`"
           class="transition duration-200 active:scale-95"
           @click="emit('add')"
         />
@@ -83,7 +83,7 @@ useSortableList(listEl, {
             <span
               class="topic-handle flex size-8 shrink-0 cursor-grab touch-none items-center justify-center rounded text-dimmed hover:text-primary active:cursor-grabbing"
               role="img"
-              aria-label="Drag to reorder"
+              aria-label="Kéo để sắp xếp lại"
             >
               <UIcon name="i-lucide-grip-vertical" class="size-5" />
             </span>
@@ -96,7 +96,7 @@ useSortableList(listEl, {
               icon="i-lucide-pencil"
               color="neutral"
               variant="ghost"
-              :aria-label="`Edit ${topic.name}`"
+              :aria-label="`Sửa ${topic.name}`"
               class="transition duration-200 active:scale-95"
               @click="emit('edit', topic)"
             />
@@ -104,7 +104,7 @@ useSortableList(listEl, {
               icon="i-lucide-trash-2"
               color="error"
               variant="ghost"
-              :aria-label="`Delete ${topic.name}`"
+              :aria-label="`Xóa ${topic.name}`"
               class="transition duration-200 active:scale-95"
               @click="emit('remove', topic)"
             />
@@ -113,7 +113,7 @@ useSortableList(listEl, {
 
         <!-- Empty state for a subject without topics -->
         <p v-else class="border-t border-default px-4 py-6 text-center text-sm text-muted">
-          No topics yet. Use the + button to add one.
+          Chưa có chủ đề nào. Dùng nút + để thêm.
         </p>
       </div>
     </div>

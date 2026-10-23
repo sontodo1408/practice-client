@@ -86,3 +86,27 @@
     animation: none;
   }
 }
+
+/* Subject card list transitions (search filtering): fade/scale in and out, siblings glide into place */
+.card-enter-active,
+.card-leave-active {
+  transition: opacity 250ms ease, transform 250ms ease;
+}
+.card-leave-active {
+  position: absolute;
+}
+.card-enter-from,
+.card-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
+.card-move {
+  transition: transform 300ms ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-enter-active,
+  .card-leave-active,
+  .card-move {
+    transition: none;
+  }
+}

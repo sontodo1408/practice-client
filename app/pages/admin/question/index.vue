@@ -7,7 +7,7 @@ import AdminQuestionForm from '~/components/admin/QuestionForm.vue'
 // Admin question management: pick a subject (and optionally a topic), then see topics as
 // expandable boxes with their questions inside.
 definePageMeta({ layout: 'admin' })
-useSeoMeta({ title: 'Questions' })
+useSeoMeta({ title: 'Câu hỏi' })
 
 const subjectApi = useSubjectApi()
 const questionApi = useQuestionApi()
@@ -52,7 +52,7 @@ watch(subjectId, () => {
 
 const subjectItems = computed(() => subjects.value.map(s => ({ label: s.name, value: s.id })))
 const topicItems = computed(() => [
-  { label: 'All topics', value: 0 },
+  { label: 'Tất cả chủ đề', value: 0 },
   ...topics.value.map(t => ({ label: t.topicName, value: t.topicId }))
 ])
 
@@ -64,7 +64,7 @@ const visibleTopics = computed(() => topics.value
 // ---- Actions ----
 async function editQuestion(question: Question) {
   const saved = await dialogStore.content<boolean>({
-    title: 'Edit question',
+    title: 'Sửa câu hỏi',
     component: AdminQuestionForm,
     props: { question }
   })
@@ -73,9 +73,9 @@ async function editQuestion(question: Question) {
 
 async function removeQuestion(question: Question) {
   const ok = await dialogStore.confirm({
-    title: 'Delete question',
-    description: `Delete "${question.title}"? This action cannot be undone.`,
-    confirmText: 'Delete',
+    title: 'Xóa câu hỏi',
+    description: `Bạn có chắc muốn xóa "${question.title}"? Hành động này không thể hoàn tác.`,
+    confirmText: 'Xóa',
     confirmColor: 'error'
   })
   if (!ok) return
@@ -93,10 +93,10 @@ async function removeQuestion(question: Question) {
     <!-- Page header -->
     <div class="motion-safe:animate-fade-up">
       <h1 class="text-2xl font-bold text-highlighted">
-        Questions
+        Câu hỏi
       </h1>
       <p class="text-sm text-muted">
-        Choose a subject to see its topics. Expand a topic to edit or delete its questions.
+        Chọn một môn học để xem các chủ đề. Mở rộng chủ đề để sửa hoặc xóa câu hỏi.
       </p>
     </div>
 
@@ -106,7 +106,7 @@ async function removeQuestion(question: Question) {
       color="error"
       variant="subtle"
       icon="i-lucide-circle-alert"
-      title="Could not load subjects"
+      title="Không thể tải danh sách môn học"
     />
 
     <!-- Client-only: data is fetched in the browser, so SSR output could never match -->
@@ -120,7 +120,7 @@ async function removeQuestion(question: Question) {
         <USelect
           v-model="subjectId"
           :items="subjectItems"
-          placeholder="Select subject"
+          placeholder="Chọn môn học"
           icon="i-lucide-book-open"
           class="w-full"
         />
@@ -140,9 +140,9 @@ async function removeQuestion(question: Question) {
           color="error"
           variant="subtle"
           icon="i-lucide-circle-alert"
-          title="Could not load questions"
+          title="Không thể tải danh sách câu hỏi"
           class="mt-6"
-          :actions="[{ label: 'Retry', color: 'error', variant: 'outline', onClick: () => load() }]"
+          :actions="[{ label: 'Thử lại', color: 'error', variant: 'outline', onClick: () => load() }]"
         />
 
         <!-- Skeletons while loading -->
@@ -167,7 +167,7 @@ async function removeQuestion(question: Question) {
         <div v-else class="mt-6 flex flex-col items-center gap-3 py-16 text-center">
           <UIcon name="i-lucide-inbox" class="size-10 text-dimmed" />
           <p class="text-sm text-muted">
-            This subject has no topics or questions yet.
+            Môn học này chưa có chủ đề hoặc câu hỏi nào.
           </p>
         </div>
       </template>

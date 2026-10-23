@@ -1,11 +1,11 @@
 // Friendly dialog title per error code
 export function apiErrorTitle(code: number) {
   switch (code) {
-    case 400: return 'Invalid request'
-    case 401: return 'Unauthorized'
-    case 403: return 'Access denied'
-    case 404: return 'Not found'
-    default: return 'Something went wrong'
+    case 400: return 'Yêu cầu không hợp lệ'
+    case 401: return 'Chưa đăng nhập'
+    case 403: return 'Không có quyền truy cập'
+    case 404: return 'Không tìm thấy'
+    default: return 'Đã xảy ra lỗi'
   }
 }
 

@@ -40,7 +40,7 @@ const difficultyColor = {
       <UBadge
         color="neutral"
         variant="subtle"
-        :label="`${topic.questions.length} question${topic.questions.length === 1 ? '' : 's'}`"
+        :label="`${topic.questions.length} câu hỏi`"
       />
     </button>
 
@@ -63,7 +63,7 @@ const difficultyColor = {
                 <p class="mt-1 whitespace-pre-line text-sm text-default">{{ q.question }}</p>
                 <!-- Answer in a muted box so it reads as secondary content -->
                 <div v-if="q.answer" class="mt-2 rounded-md bg-elevated px-3 py-2 text-sm text-muted">
-                  <span class="font-medium text-highlighted">Answer: </span>
+                  <span class="font-medium text-highlighted">Đáp án: </span>
                   <span class="whitespace-pre-line">{{ q.answer }}</span>
                 </div>
               </div>
@@ -71,7 +71,7 @@ const difficultyColor = {
                 icon="i-lucide-pencil"
                 color="neutral"
                 variant="ghost"
-                :aria-label="`Edit ${q.title}`"
+                :aria-label="`Sửa ${q.title}`"
                 class="transition duration-200 active:scale-95"
                 @click="emit('edit', q)"
               />
@@ -79,7 +79,7 @@ const difficultyColor = {
                 icon="i-lucide-trash-2"
                 color="error"
                 variant="ghost"
-                :aria-label="`Delete ${q.title}`"
+                :aria-label="`Xóa ${q.title}`"
                 class="transition duration-200 active:scale-95"
                 @click="emit('remove', q)"
               />
@@ -89,7 +89,7 @@ const difficultyColor = {
 
         <!-- Empty state for a topic without questions -->
         <p v-else class="border-t border-default px-4 py-6 text-center text-sm text-muted">
-          No questions in this topic yet.
+          Chủ đề này chưa có câu hỏi nào.
         </p>
       </div>
     </div>
