@@ -172,7 +172,12 @@ onBeforeUnmount(() => observer?.disconnect())
         <p v-if="!sections.length" class="py-10 text-center text-muted">Chưa có chủ đề nào</p>
       </div>
 
-      <UserQuestionDialog v-model:open="dialogOpen" :question="selected" />
+      <UserQuestionDialog
+        v-model:open="dialogOpen"
+        :question="selected"
+        :subject-name="subject.name"
+        :subject-description="subject.description"
+      />
     </div>
   </div>
 </template>

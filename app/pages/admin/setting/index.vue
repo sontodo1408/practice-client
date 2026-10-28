@@ -39,7 +39,8 @@ const state = reactive<SettingPayload>({
   aiModel: '',
   apiKey: '',
   dailyBeanLimit: 0,
-  beanPerQuestion: 1
+  beanPerQuestion: 1,
+  promptQuestion: ''
 })
 const saving = ref(false)
 // Toggle to reveal the API key while typing
@@ -50,6 +51,8 @@ const { listModels } = useAiModelApi()
 const toast = useToast()
 const models = ref<string[]>([])
 const loadingModels = ref(false)
+// Select items: downloaded models plus the current value, so a stored/custom model is always displayed
+const modelItems = computed(() => [...new Set([state.aiModel, ...models.value].filter(Boolean))])
 // Models belong to one provider, so drop the loaded list when the provider changes
 watch(() => state.aiType, () => { models.value = [] })
 
@@ -79,6 +82,7 @@ function fillFromSetting(value: Setting) {
   state.aiModel = value.aiModel ?? ''
   state.dailyBeanLimit = value.dailyBeanLimit ?? 0
   state.beanPerQuestion = value.beanPerQuestion ?? 1
+  state.promptQuestion = value.promptQuestion ?? ''
   state.apiKey = ''
 }
 
@@ -99,6 +103,12 @@ function validate(values: Partial<SettingPayload>): FormError[] {
   if (values.beanPerQuestion == null || !Number.isInteger(values.beanPerQuestion) || values.beanPerQuestion < 0) {
     errors.push({ name: 'beanPerQuestion', message: 'Nhập số nguyên lớn hơn hoặc bằng 0' })
   }
+  if (!values.promptQuestion?.trim()) {
+    errors.push({ name: 'promptQuestion', message: 'Vui lòng nhập prompt review câu trả lời' })
+  } else if ((values.promptQuestion.match(/%s/g) ?? []).length !== 4) {
+    // The backend fills subject, topic, question and answer in order via String.format
+    errors.push({ name: 'promptQuestion', message: 'Prompt phải chứa đúng 4 ký tự %s (subject, chủ đề, câu hỏi, câu trả lời)' })
+  }
   return errors
 }
 
@@ -107,7 +117,7 @@ function validate(values: Partial<SettingPayload>): FormError[] {
 async function onSubmit(event: FormSubmitEvent<SettingPayload>) {
   saving.value = true
   try {
-    await settingApi.update({ ...event.data, aiModel: event.data.aiModel.trim(), apiKey: event.data.apiKey.trim() })
+    await settingApi.update({ ...event.data, aiModel: event.data.aiModel.trim(), promptQuestion: event.data.promptQuestion.trim(), apiKey: event.data.apiKey.trim() })
     await refresh()
   } catch (e) {
     if (!(e instanceof ApiError)) throw e
@@ -174,9 +184,18 @@ function reset() {
               <USelect v-model="state.aiType" :items="aiTypeItems" value-key="value" class="w-full" />
             </UFormField>
             <UFormField label="Model" name="aiModel" required>
-              <!-- Free text with native suggestions (datalist) filled by the download button -->
+              <!-- Searchable list filled by the download button; a typed name not in the list can still be added.
+                   Unlike a native datalist, the full list stays visible when a value is already selected. -->
               <div class="flex gap-2">
-                <UInput v-model="state.aiModel" class="w-full" list="ai-model-options" placeholder="VD: gemini-2.5-flash" />
+                <USelectMenu
+                  v-model="state.aiModel"
+                  :items="modelItems"
+                  create-item
+                  class="w-full"
+                  placeholder="VD: gemini-2.5-flash"
+                  :search-input="{ placeholder: 'Tìm hoặc nhập tên model...' }"
+                  @create="(name: string) => { state.aiModel = name }"
+                />
                 <UTooltip text="Tải danh sách model khả dụng">
                   <UButton
                     icon="i-lucide-download"
@@ -189,9 +208,6 @@ function reset() {
                   />
                 </UTooltip>
               </div>
-              <datalist id="ai-model-options">
-                <option v-for="m in models" :key="m" :value="m" />
-              </datalist>
             </UFormField>
           </div>
 
@@ -219,6 +235,15 @@ function reset() {
                 />
               </template>
             </UInput>
+          </UFormField>
+
+          <UFormField
+            label="Prompt review câu trả lời"
+            name="promptQuestion"
+            required
+            help="Dùng đúng 4 ký tự %s theo thứ tự: subject, chủ đề, câu hỏi, câu trả lời của người dùng."
+          >
+            <UTextarea v-model="state.promptQuestion" :rows="12" autoresize :maxrows="24" class="w-full font-mono" />
           </UFormField>
         </div>
       </UCard>

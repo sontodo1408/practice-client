@@ -10,6 +10,8 @@ export interface Setting {
   apiKeyMasked: string | null
   dailyBeanLimit: number
   beanPerQuestion: number
+  // Template sent to the AI to review a user's answer (uses %s placeholders)
+  promptQuestion: string | null
   // ISO-8601 instant
   updatedAt: string
 }
@@ -24,4 +26,5 @@ export interface SettingPayload {
   apiKey: string
   dailyBeanLimit: number
   beanPerQuestion: number
+  promptQuestion: string
 }

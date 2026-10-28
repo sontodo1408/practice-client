@@ -7,6 +7,12 @@ const route = useRoute()
 // Search text mirrors ?q= so the home screen can filter; typing navigates to / (debounced)
 const search = ref(typeof route.query.q === 'string' ? route.query.q : '')
 watch(() => route.query.q, (q) => { search.value = typeof q === 'string' ? q : '' })
+
+// The URL hash (e.g. #topic) never reaches the server, so including it in the login link during
+// hydration causes a mismatch. Start without it and add it once mounted.
+const mounted = ref(false)
+onMounted(() => { mounted.value = true })
+const loginTo = computed(() => loginLocation(mounted.value ? route.fullPath : route.fullPath.split('#')[0]!))
 let timer: ReturnType<typeof setTimeout> | undefined
 function onSearch() {
   clearTimeout(timer)
@@ -96,7 +102,7 @@ const userMenu = computed(() => [
         </UDropdownMenu>
 
         <!-- Signed out: login button that returns here afterwards -->
-        <UButton v-else :to="loginLocation(route.fullPath)" icon="i-lucide-log-in" class="active:scale-95">
+        <UButton v-else :to="loginTo" icon="i-lucide-log-in" class="active:scale-95">
           Đăng nhập
         </UButton>
       </div>
