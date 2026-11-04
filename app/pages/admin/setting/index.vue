@@ -46,6 +46,31 @@ const saving = ref(false)
 // Toggle to reveal the API key while typing
 const showKey = ref(false)
 
+// Ready-made review prompt (4 %s: subject, topic, question, answer) so admins don't have to type it from scratch
+const SAMPLE_PROMPT = `Hãy review câu trả lời của người học cho câu hỏi dưới đây.
+subject: %s-%s
+question: %s
+answer: %s
+
+Hãy trả lời bằng tiếng Việt, đúng theo cấu trúc sau:
+1. Điểm: x/10 (dựa trên độ chính xác, đầy đủ và rõ ràng, dựa vào ý, không bắt bẻ câu từ vì là văn nói)
+2. Nhận xét: nêu điểm đúng, điểm sai hoặc còn thiếu trong câu trả lời
+3. Giải thích: trình bày kiến thức liên quan để người học hiểu đúng bản chất
+4. Đáp án gợi ý: viết lại một câu trả lời mẫu ngắn gọn, chính xác`
+
+function applySamplePrompt() {
+  state.promptQuestion = SAMPLE_PROMPT
+}
+
+async function copySamplePrompt() {
+  try {
+    await navigator.clipboard.writeText(SAMPLE_PROMPT)
+    toast.add({ title: 'Đã sao chép prompt mẫu', color: 'success', icon: 'i-lucide-check-circle' })
+  } catch {
+    toast.add({ title: 'Không thể sao chép, hãy chọn và copy thủ công', color: 'error' })
+  }
+}
+
 // ---- Model suggestions ----
 const { listModels } = useAiModelApi()
 const toast = useToast()
@@ -245,6 +270,25 @@ function reset() {
           >
             <UTextarea v-model="state.promptQuestion" :rows="12" autoresize :maxrows="24" class="w-full font-mono" />
           </UFormField>
+
+          <!-- Suggested prompt: fill the field or copy it in one click -->
+          <div class="rounded-lg border border-default bg-elevated/50 p-3">
+            <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <span class="flex items-center gap-1.5 text-sm font-medium text-highlighted">
+                <UIcon name="i-lucide-lightbulb" class="size-4 text-primary" />
+                Gợi ý prompt
+              </span>
+              <div class="flex gap-2">
+                <UButton size="xs" color="neutral" variant="outline" icon="i-lucide-copy" @click="copySamplePrompt">
+                  Sao chép
+                </UButton>
+                <UButton size="xs" icon="i-lucide-wand-sparkles" @click="applySamplePrompt">
+                  Dùng prompt này
+                </UButton>
+              </div>
+            </div>
+            <pre class="max-h-60 overflow-auto whitespace-pre-wrap font-mono text-xs text-muted">{{ SAMPLE_PROMPT }}</pre>
+          </div>
         </div>
       </UCard>
 

@@ -79,7 +79,7 @@ const userMenu = computed(() => [
         <UColorModeButton />
         <UDropdownMenu :items="userMenu" :content="{ align: 'end' }">
           <UButton color="neutral" variant="ghost" trailing-icon="i-lucide-chevron-down" class="transition duration-200 active:scale-95">
-            <UAvatar :alt="userLabel" size="xs" />
+            <UAvatar :src="authStore.user?.avatarUrl || undefined" :alt="userLabel" size="xs" />
             <span class="hidden max-w-40 truncate sm:inline">{{ userLabel }}</span>
           </UButton>
         </UDropdownMenu>

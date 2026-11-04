@@ -95,7 +95,7 @@ const userMenu = computed(() => [
         <!-- Signed in: avatar menu -->
         <UDropdownMenu v-if="authStore.isLoggedIn" :items="userMenu" :content="{ align: 'end' }">
           <UButton color="neutral" variant="ghost" class="gap-2 active:scale-95">
-            <UAvatar :src="authStore.user?.avatarUrl ?? undefined" :alt="userLabel" size="xs" />
+            <UAvatar :src="authStore.user?.avatarUrl || undefined" :alt="userLabel" size="xs" />
             <span class="hidden max-w-32 truncate sm:inline">{{ userLabel }}</span>
             <UIcon name="i-lucide-chevron-down" class="size-4 text-muted" />
           </UButton>
