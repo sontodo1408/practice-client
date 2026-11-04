@@ -1,5 +1,7 @@
 <script setup lang="ts">
 // Shared layout for all admin screens: top header + left sidebar + content area
+// Admin screens must never be indexed
+useSeoMeta({ robots: 'noindex, nofollow' })
 const authStore = useAuthStore()
 const { logout } = useAuth()
 
@@ -13,6 +15,13 @@ const userLabel = computed(() => {
   const user = authStore.user
   const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ')
   return fullName || user?.username || 'Admin'
+})
+
+// Breadcrumb: "Quản trị" is only a group (no page), the last crumb is the current admin screen taken from the nav
+const route = useRoute()
+const crumbs = computed(() => {
+  const current = adminNavItems.find(item => typeof item.to === 'string' && route.path.startsWith(item.to))
+  return [{ label: 'Quản trị' }, ...(current ? [{ label: String(current.label) }] : [])]
 })
 
 // Account menu in the header
@@ -78,6 +87,8 @@ const userMenu = computed(() => [
 
       <!-- Page content -->
       <main class="mx-auto w-full max-w-6xl p-4 sm:p-6">
+        <!-- Not indexed, so no structured data -->
+        <AppBreadcrumb :items="crumbs" :schema="false" class="mb-4" />
         <slot />
       </main>
     </div>

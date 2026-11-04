@@ -4,9 +4,10 @@ import type { LoginPayload } from '~/types/auth'
 
 // Use the centered auth layout
 definePageMeta({ layout: 'auth' })
-useSeoMeta({ title: 'Đăng nhập' })
+// Login is not meant to appear in search results
+usePageSeo({ title: 'Đăng nhập', description: 'Đăng nhập để lưu tiến độ học.', noindex: true })
 
-const { login } = useAuth()
+const { login, loginWithGoogle } = useAuth()
 const route = useRoute()
 
 const state = reactive<LoginPayload>({ username: '', password: '' })
@@ -54,17 +55,27 @@ async function onSubmit(event: FormSubmitEvent<LoginPayload>) {
     loading.value = false
   }
 }
+
+// Google sign-in: the button hands over an ID token which the backend verifies
+async function onGoogleCredential(idToken: string) {
+  loading.value = true
+  try {
+    await loginWithGoogle(idToken)
+    await navigateTo(safeRedirect(route.query.redirect))
+  } catch (e) {
+    if (!(e instanceof ApiError)) throw e
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <template>
   <div class="motion-safe:animate-fade-up">
     <!-- Brand header -->
     <div class="mb-6 text-center">
-      <img
-        src="/logo.png"
-        alt="Logo công ty"
-        class="mx-auto mb-4 size-16 drop-shadow-lg transition-transform duration-200 hover:scale-105"
-      >
+      <img src="/logo.png" alt="Logo công ty"
+        class="mx-auto mb-4 size-16 drop-shadow-lg transition-transform duration-200 hover:scale-105">
       <h1 class="text-2xl font-bold text-highlighted">
         Chào mừng trở lại
       </h1>
@@ -77,54 +88,35 @@ async function onSubmit(event: FormSubmitEvent<LoginPayload>) {
       <!-- Login form with inline validation -->
       <UForm :validate="validate" :state="state" class="space-y-5" @submit="onSubmit">
         <UFormField label="Tên đăng nhập" name="username" class="motion-safe:animate-fade-up" style="--index: 1">
-          <UInput
-            v-model="state.username"
-            placeholder="Nhập tên đăng nhập"
-            icon="i-lucide-user"
-            autocomplete="username"
-            size="lg"
-            class="w-full"
-          />
+          <UInput v-model="state.username" placeholder="Nhập tên đăng nhập" icon="i-lucide-user" autocomplete="username"
+            size="lg" class="w-full" />
         </UFormField>
 
         <UFormField label="Mật khẩu" name="password" class="motion-safe:animate-fade-up" style="--index: 2">
-          <UInput
-            v-model="state.password"
-            :type="showPassword ? 'text' : 'password'"
-            placeholder="••••••••"
-            icon="i-lucide-lock"
-            autocomplete="current-password"
-            size="lg"
-            class="w-full"
-            :ui="{ trailing: 'pe-1' }"
-          >
+          <UInput v-model="state.password" :type="showPassword ? 'text' : 'password'" placeholder="••••••••"
+            icon="i-lucide-lock" autocomplete="current-password" size="lg" class="w-full" :ui="{ trailing: 'pe-1' }">
             <!-- Toggle password visibility -->
             <template #trailing>
-              <UButton
-                color="neutral"
-                variant="link"
-                size="sm"
+              <UButton color="neutral" variant="link" size="sm"
                 :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
-                :aria-label="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
-                @click="showPassword = !showPassword"
-              />
+                :aria-label="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'" @click="showPassword = !showPassword" />
             </template>
           </UInput>
         </UFormField>
 
         <!-- Primary action with hover/active feedback -->
-        <UButton
-          type="submit"
-          block
-          size="lg"
-          :loading="loading"
-          :disabled="!hydrated"
+        <UButton type="submit" block size="lg" :loading="loading" :disabled="!hydrated"
           class="motion-safe:animate-fade-up transition duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-95"
-          style="--index: 3"
-        >
+          style="--index: 3">
           Đăng nhập
         </UButton>
       </UForm>
+
+      <!-- Google sign-in (hidden when no client id is configured) -->
+      <div v-if="$config.public.googleClientId" class="motion-safe:animate-fade-up" style="--index: 4">
+        <USeparator label="hoặc" class="my-5" />
+        <AuthGoogleSignInButton @credential="onGoogleCredential" />
+      </div>
     </UCard>
   </div>
 </template>

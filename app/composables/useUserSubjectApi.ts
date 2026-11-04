@@ -1,4 +1,4 @@
-import type { TopicQuestion } from '~/types/question'
+import type { QuestionPageData, TopicQuestion } from '~/types/question'
 import type { Topic } from '~/types/topic'
 import type { UserSubject } from '~/types/userSubject'
 
@@ -16,6 +16,9 @@ export function useUserSubjectApi() {
     listTopics: (subjectId: number) => api.get<Topic[]>(`/practice/home/topic/${subjectId}`, options),
     // GET /practice/home/question/{subjectId}: questions grouped by topic
     listQuestions: (subjectId: number) =>
-      api.get<TopicQuestion[]>(`/practice/home/question/${subjectId}`, options)
+      api.get<TopicQuestion[]>(`/practice/home/question/${subjectId}`, options),
+    // GET /practice/question/{subjectSlug}/{questionId}: the question, its neighbours and following questions
+    getQuestionPage: (subjectSlug: string, questionId: number) =>
+      api.get<QuestionPageData>(`/practice/question/${subjectSlug}/${questionId}`, options)
   }
 }

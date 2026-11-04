@@ -8,7 +8,10 @@ export default defineNuxtConfig({
   app: {
     // Favicon uses the brand logo from /public
     head: {
-      link: [{ rel: 'icon', type: 'image/png', href: '/logo.png' }]
+      htmlAttrs: { lang: 'vi' },
+      titleTemplate: (title?: string) => (title ? `${title} | Practice` : 'Practice'),
+      link: [{ rel: 'icon', type: 'image/png', href: '/logo.png' }],
+      meta: [{ property: 'og:site_name', content: 'Practice' }, { property: 'og:locale', content: 'vi_VN' }]
     },
     // Animated route/layout changes; CSS lives in main.css (.page-*)
     pageTransition: { name: 'page', mode: 'out-in' },
@@ -16,8 +19,12 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
+      // Public origin of the site, used for canonical URLs and og:url (override with NUXT_PUBLIC_SITE_URL)
+      siteUrl: 'https://practice.sontd.io.vn',
       // API gateway (port 50000) + global prefix; services live under /identity, /practice, /profile
-      apiBase: 'http://localhost:50000/api/v1'
+      apiBase: 'http://localhost:50000/api/v1',
+      // Google OAuth web client id (same one as the backend GOOGLE_CLIENT_ID); override with NUXT_PUBLIC_GOOGLE_CLIENT_ID
+      googleClientId: '400239326113-5irehn2qafd3m1tsas4ufikhgsnsjgpd.apps.googleusercontent.com'
     }
   },
 

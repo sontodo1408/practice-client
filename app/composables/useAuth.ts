@@ -12,6 +12,12 @@ export function useAuth() {
     authStore.setUser(user)
   }
 
+  // POST /identity/auth/google/login with the Google ID token (mirrors Java GoogleLoginRequest)
+  async function loginWithGoogle(idToken: string) {
+    const { user } = await api.post<AuthResponse>('/identity/auth/google/login', { idToken })
+    authStore.setUser(user)
+  }
+
   // GET /identity/auth/me: restore the user from the token cookie (e.g. after a reload).
   // Fails quietly and never redirects: no/expired token just leaves the store empty.
   async function fetchMe() {
@@ -32,5 +38,5 @@ export function useAuth() {
     }
   }
 
-  return { login, fetchMe, logout }
+  return { login, loginWithGoogle, fetchMe, logout }
 }

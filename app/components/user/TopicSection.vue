@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import type { Question } from '~/types/question'
 import type { SubjectSectionData } from '~/types/userSubject'
 
 // One topic: a two-column table, "Must know" (easy/medium) and "Senior knowledge" (HARD), titles only
-const props = defineProps<{ section: SubjectSectionData, subjectId: number }>()
-// Asks the page to open the question dialog
-const emit = defineEmits<{ open: [question: Question] }>()
+// subjectSlug builds the link of each question page
+const props = defineProps<{ section: SubjectSectionData, subjectId: number, subjectSlug: string }>()
 
 const learnedStore = useLearnedStore()
 
@@ -48,15 +46,14 @@ const columns = computed(() => [
               :aria-label="`Đánh dấu đã hiểu: ${q.title}`"
               @update:model-value="learnedStore.setLearned(subjectId, q.id, $event === true)"
             />
-            <!-- Title opens the practice dialog -->
-            <button
-              type="button"
+            <!-- Title is a real link to the question page (crawlable, openable in a new tab) -->
+            <NuxtLink
+              :to="`/subject/${subjectSlug}/${questionSlug(q)}`"
               class="min-w-0 flex-1 text-left text-sm transition hover:text-primary"
               :class="learnedStore.isLearned(subjectId, q.id) ? 'text-muted line-through' : 'text-default'"
-              @click="emit('open', q)"
             >
               {{ q.title }}
-            </button>
+            </NuxtLink>
           </li>
         </ul>
         <p v-else class="px-4 py-3 text-sm text-muted">Chưa có câu hỏi</p>
