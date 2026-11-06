@@ -36,7 +36,18 @@ const userLabel = computed(() => {
 const userMenu = computed(() => [
   [{ label: userLabel.value, type: 'label' as const }],
   [
-    ...(authStore.isAdmin ? [{ label: 'Admin', icon: 'i-lucide-shield', to: '/admin/subject' }] : []),
+    ...(authStore.isAdmin
+      ? [{
+          label: 'Admin',
+          icon: 'i-lucide-shield',
+          // Release focus from the menu trigger before the layout swaps, otherwise the
+          // old layout gets aria-hidden while the trigger still holds focus (a11y warning)
+          onSelect: () => {
+            if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
+            navigateTo('/admin/subject')
+          }
+        }]
+      : []),
     {
       label: 'Đăng xuất',
       icon: 'i-lucide-log-out',

@@ -28,7 +28,9 @@ export const SUBJECT_IMAGE_GROUPS: ImageGroup[] = [
     images: [
       img('banner', 'img_db.png', 'Database'),
       img('banner', 'img_java_core.png', 'Java Core'),
-      img('banner', 'img_spring_boot.png', 'Spring Boot')
+      img('banner', 'img_spring_boot.png', 'Spring Boot'),
+      img('banner', 'img_docker.png', 'Docker'),
+      img('banner', 'img_jenkins.png', 'Jenkins')
     ]
   },
   {
