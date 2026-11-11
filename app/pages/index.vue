@@ -55,6 +55,9 @@ const { data: listData, status, refresh } = await useAsyncData(
 )
 const allSubjects = computed(() => listData.value.subjects)
 const loadError = computed(() => listData.value.error)
+// Totals for the hero stats (follow the current search result)
+const topicTotal = computed(() => allSubjects.value.reduce((sum, s) => sum + s.topicCount, 0))
+const questionTotal = computed(() => allSubjects.value.reduce((sum, s) => sum + s.questionCount, 0))
 // Only the first load shows skeletons; later searches keep the cards on screen so they animate smoothly
 const loadingAll = computed(() => status.value === 'pending' && !allSubjects.value.length)
 
@@ -90,14 +93,17 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-12">
-    <!-- Hero greeting -->
-    <div class="animate-fade-up text-center">
-      <h1 class="text-3xl font-bold text-highlighted sm:text-4xl">
-        {{ authStore.isLoggedIn ? `Chào mừng trở lại, ${authStore.user?.firstName || authStore.user?.username}` : 'Bộ câu hỏi phỏng vấn lập trình' }}
-      </h1>
-      <p class="mt-2 text-muted">Chọn một bộ câu hỏi và bắt đầu luyện tập.</p>
-    </div>
+  <div class="flex flex-col gap-12">
+    <!-- Hero banner with headline, call to action and catalog stats -->
+    <UserHomeHero
+      :user-name="authStore.isLoggedIn ? (authStore.user?.firstName || authStore.user?.username || '') : ''"
+      :subject-count="allSubjects.length"
+      :topic-count="topicTotal"
+      :question-count="questionTotal"
+    />
+
+    <!-- One-line promo strip linking to the vocabulary screen -->
+    <UserVocabPromoBar class="-mt-6" />
 
     <!-- Inline error with retry so a failed request never leaves the page blank -->
     <UAlert
@@ -110,17 +116,23 @@ onMounted(() => {
       :actions="[{ label: 'Thử lại', color: 'error', variant: 'outline', onClick: () => refresh() }]"
     />
 
+    <!-- Anchor for the hero button; scroll-mt keeps the title clear of the sticky header -->
     <UserSubjectSection
       v-else
+      id="subjects"
+      class="scroll-mt-24"
       title="Tất cả bộ câu hỏi"
+      icon="i-lucide-library"
       :subjects="allSubjects"
       :loading="loadingAll"
       :empty-text="keyword ? 'Không có môn học nào khớp với tìm kiếm' : 'Chưa có môn học nào'"
       empty-icon="i-lucide-search-x"
     />
 
+    <!-- Fixed order: hero, all subjects, then "studying" -->
     <UserSubjectSection
       title="Đang học"
+      icon="i-lucide-flame"
       :subjects="studying"
       :loading="loadingCatalog"
       empty-text="Bạn chưa bắt đầu môn học nào. Hãy chọn một môn ở trên!"

@@ -12,6 +12,8 @@ export interface Setting {
   beanPerQuestion: number
   // Template sent to the AI to review a user's answer (uses %s placeholders)
   promptQuestion: string | null
+  // Template sent to the AI to review the sentences a user wrote with vocabulary words (one %s placeholder); null until set
+  promptVocab?: string | null
   // ISO-8601 instant
   updatedAt: string
 }
@@ -27,4 +29,5 @@ export interface SettingPayload {
   dailyBeanLimit: number
   beanPerQuestion: number
   promptQuestion: string
+  promptVocab: string
 }

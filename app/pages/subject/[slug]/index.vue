@@ -93,12 +93,15 @@ onBeforeUnmount(() => observer?.disconnect())
   <div>
     <!-- Single root element (required for page transitions); the states below are mutually exclusive -->
     <!-- Loading skeleton with the same two-column shape -->
-    <div v-if="loading" class="grid gap-6 lg:grid-cols-[18rem_1fr]">
-      <USkeleton class="h-72 rounded-2xl" />
-      <div class="space-y-4">
-        <USkeleton class="h-8 w-1/3" />
-        <USkeleton class="h-48 rounded-2xl" />
-        <USkeleton class="h-48 rounded-2xl" />
+    <div v-if="loading" class="space-y-6">
+      <USkeleton class="h-40 rounded-3xl" />
+      <div class="grid gap-6 lg:grid-cols-[18rem_1fr]">
+        <USkeleton class="h-72 rounded-2xl" />
+        <div class="space-y-4">
+          <USkeleton class="h-8 w-1/3" />
+          <USkeleton class="h-48 rounded-2xl" />
+          <USkeleton class="h-48 rounded-2xl" />
+        </div>
       </div>
     </div>
 
@@ -123,6 +126,9 @@ onBeforeUnmount(() => observer?.disconnect())
     <div v-else-if="subject" class="animate-fade-up">
       <!-- Breadcrumb: Trang chủ > subject (current page, not a link) -->
       <AppBreadcrumb :items="[{ label: subject.name }]" class="mb-4" />
+
+      <!-- Banner: subject info, progress ring and the continue button -->
+      <UserSubjectHero :subject="subject" :sections="sections" class="mb-6" />
 
       <div class="grid gap-6 lg:grid-cols-[18rem_1fr]">
         <!-- Left: sticky on desktop, stacked on top on mobile -->

@@ -9,16 +9,26 @@ withDefaults(defineProps<{
   // Text shown when there is nothing to list
   emptyText?: string
   emptyIcon?: string
+  // Icon shown before the title
+  icon?: string
 }>(), {
   loading: false,
   emptyText: 'Chưa có nội dung',
-  emptyIcon: 'i-lucide-inbox'
+  emptyIcon: 'i-lucide-inbox',
+  icon: undefined
 })
 </script>
 
 <template>
   <section class="animate-fade-up">
-    <h2 class="mb-4 text-xl font-bold text-highlighted sm:text-2xl">{{ title }}</h2>
+    <!-- Section title with optional icon and a count badge once loaded -->
+    <h2 class="mb-4 flex items-center gap-2 text-xl font-bold text-highlighted sm:text-2xl">
+      <span v-if="icon" class="flex size-8 items-center justify-center rounded-lg bg-brand-100 text-primary dark:bg-brand-950">
+        <UIcon :name="icon" class="size-5" />
+      </span>
+      {{ title }}
+      <UBadge v-if="!loading && subjects.length" :label="String(subjects.length)" color="neutral" variant="subtle" size="sm" />
+    </h2>
 
     <!-- Loading: skeleton squares -->
     <div v-if="loading" class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">

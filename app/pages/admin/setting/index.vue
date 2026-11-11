@@ -40,7 +40,8 @@ const state = reactive<SettingPayload>({
   apiKey: '',
   dailyBeanLimit: 0,
   beanPerQuestion: 1,
-  promptQuestion: ''
+  promptQuestion: '',
+  promptVocab: ''
 })
 const saving = ref(false)
 // Toggle to reveal the API key while typing
@@ -58,13 +59,28 @@ Hãy trả lời bằng tiếng Việt, đúng theo cấu trúc sau:
 3. Giải thích: trình bày kiến thức liên quan để người học hiểu đúng bản chất
 4. Đáp án gợi ý: viết lại một câu trả lời mẫu ngắn gọn, chính xác`
 
+// Ready-made vocabulary prompt (1 %s: the list of "word: sentence" lines the user wrote)
+const SAMPLE_PROMPT_VOCAB = `Tôi đang luyện đặt câu tiếng Anh với từ khóa. Với mỗi từ khóa, tôi đã đặt một câu tiếng Anh phải có chứa từ khóa đó. Hãy review các câu dưới đây, xem câu của tôi với từng từ khóa có đúng hay không, nếu sai thì chỉ ra chỗ sai.
+Danh sách (mỗi dòng theo dạng "từ khóa: câu của tôi"):
+%s
+
+Hãy trả lời bằng tiếng Việt, với mỗi từ khóa theo đúng cấu trúc sau:
+- Từ khóa: ...
+- Kết quả: Đúng / Sai
+- Nếu sai: chỉ rõ chỗ sai (ngữ pháp, cách dùng từ, chính tả...) và giải thích ngắn gọn
+- Câu gợi ý: viết lại câu đúng (hoặc câu mẫu tự nhiên hơn)`
+
 function applySamplePrompt() {
   state.promptQuestion = SAMPLE_PROMPT
 }
+function applySamplePromptVocab() {
+  state.promptVocab = SAMPLE_PROMPT_VOCAB
+}
 
-async function copySamplePrompt() {
+// Copy a sample prompt to the clipboard and confirm with a toast
+async function copySamplePrompt(text = SAMPLE_PROMPT) {
   try {
-    await navigator.clipboard.writeText(SAMPLE_PROMPT)
+    await navigator.clipboard.writeText(text)
     toast.add({ title: 'Đã sao chép prompt mẫu', color: 'success', icon: 'i-lucide-check-circle' })
   } catch {
     toast.add({ title: 'Không thể sao chép, hãy chọn và copy thủ công', color: 'error' })
@@ -108,6 +124,7 @@ function fillFromSetting(value: Setting) {
   state.dailyBeanLimit = value.dailyBeanLimit ?? 0
   state.beanPerQuestion = value.beanPerQuestion ?? 1
   state.promptQuestion = value.promptQuestion ?? ''
+  state.promptVocab = value.promptVocab ?? ''
   state.apiKey = ''
 }
 
@@ -134,6 +151,10 @@ function validate(values: Partial<SettingPayload>): FormError[] {
     // The backend fills subject, topic, question and answer in order via String.format
     errors.push({ name: 'promptQuestion', message: 'Prompt phải chứa đúng 4 ký tự %s (subject, chủ đề, câu hỏi, câu trả lời)' })
   }
+  // Optional (the sentence review is not live yet), but when filled it must hold the single list placeholder
+  if (values.promptVocab?.trim() && (values.promptVocab.match(/%s/g) ?? []).length !== 1) {
+    errors.push({ name: 'promptVocab', message: 'Prompt phải chứa đúng 1 ký tự %s (danh sách từ khóa và câu của người dùng)' })
+  }
   return errors
 }
 
@@ -142,7 +163,7 @@ function validate(values: Partial<SettingPayload>): FormError[] {
 async function onSubmit(event: FormSubmitEvent<SettingPayload>) {
   saving.value = true
   try {
-    await settingApi.update({ ...event.data, aiModel: event.data.aiModel.trim(), promptQuestion: event.data.promptQuestion.trim(), apiKey: event.data.apiKey.trim() })
+    await settingApi.update({ ...event.data, aiModel: event.data.aiModel.trim(), promptQuestion: event.data.promptQuestion.trim(), promptVocab: event.data.promptVocab.trim(), apiKey: event.data.apiKey.trim() })
     await refresh()
   } catch (e) {
     if (!(e instanceof ApiError)) throw e
@@ -279,7 +300,7 @@ function reset() {
                 Gợi ý prompt
               </span>
               <div class="flex gap-2">
-                <UButton size="xs" color="neutral" variant="outline" icon="i-lucide-copy" @click="copySamplePrompt">
+                <UButton size="xs" color="neutral" variant="outline" icon="i-lucide-copy" @click="copySamplePrompt()">
                   Sao chép
                 </UButton>
                 <UButton size="xs" icon="i-lucide-wand-sparkles" @click="applySamplePrompt">
@@ -288,6 +309,33 @@ function reset() {
               </div>
             </div>
             <pre class="max-h-60 overflow-auto whitespace-pre-wrap font-mono text-xs text-muted">{{ SAMPLE_PROMPT }}</pre>
+          </div>
+
+          <!-- Prompt used to review the sentences written in the vocabulary "Đặt câu" mode -->
+          <UFormField
+            label="Prompt review đặt câu từ vựng"
+            name="promptVocab"
+            help="Dùng đúng 1 ký tự %s: danh sách các dòng “từ khóa: câu của người dùng”. Để trống nếu chưa dùng."
+          >
+            <UTextarea v-model="state.promptVocab" :rows="10" autoresize :maxrows="24" class="w-full font-mono" />
+          </UFormField>
+
+          <div class="rounded-lg border border-default bg-elevated/50 p-3">
+            <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <span class="flex items-center gap-1.5 text-sm font-medium text-highlighted">
+                <UIcon name="i-lucide-lightbulb" class="size-4 text-primary" />
+                Gợi ý prompt từ vựng
+              </span>
+              <div class="flex gap-2">
+                <UButton size="xs" color="neutral" variant="outline" icon="i-lucide-copy" @click="copySamplePrompt(SAMPLE_PROMPT_VOCAB)">
+                  Sao chép
+                </UButton>
+                <UButton size="xs" icon="i-lucide-wand-sparkles" @click="applySamplePromptVocab">
+                  Dùng prompt này
+                </UButton>
+              </div>
+            </div>
+            <pre class="max-h-60 overflow-auto whitespace-pre-wrap font-mono text-xs text-muted">{{ SAMPLE_PROMPT_VOCAB }}</pre>
           </div>
         </div>
       </UCard>
