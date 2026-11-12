@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { VocabSetDetail } from '~/types/vocab'
+// Imported explicitly: auto-imported components are only available in templates, not in script code
+import AdminVocabWordForm from '~/components/admin/VocabWordForm.vue'
 
 // Vocabulary set page: centered two-column layout. Left: small sidebar with the study modes.
 // Right: the selected mode (flashcards / multiple choice / write sentences).
@@ -7,6 +9,8 @@ definePageMeta({ layout: 'user' })
 
 const route = useRoute()
 const api = useVocabApi()
+const authStore = useAuthStore()
+const dialogStore = useDialogStore()
 const slug = computed(() => String(route.params.slug))
 
 // Loaded on the server too; a failed request is shown inline and never throws out of the page
@@ -29,8 +33,36 @@ const loading = computed(() => status.value === 'pending' && !set.value)
 
 usePageSeo({
   title: () => (set.value ? `Học từ vựng ${set.value.name}` : 'Bộ từ vựng'),
-  description: () => toSnippet(set.value?.description || `Học ${words.value.length} từ vựng bằng thẻ ghi nhớ, trắc nghiệm và đặt câu.`)
+  description: () => toSnippet(set.value?.description || `Học ${words.value.length} từ vựng bằng thẻ ghi nhớ, trắc nghiệm và đặt câu.`),
+  image: () => (set.value?.imgBanner ? imgUrl(set.value.imgBanner) : null)
 })
+// An unknown slug answers with a real 404 status for search engines (same as the subject screen)
+if (!set.value && !loadError.value && import.meta.server) setResponseStatus(useRequestEvent()!, 404)
+// Structured data: lets search engines show the set as a course
+useHead({
+  script: [{
+    type: 'application/ld+json',
+    innerHTML: () => JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Course',
+      'name': set.value?.name,
+      'description': set.value?.description ?? undefined,
+      'inLanguage': 'vi'
+    })
+  }]
+})
+
+// Signed-in users can add a word to this set; reload the set afterwards so the new word shows up
+async function openAddWord() {
+  if (!set.value) return
+  const saved = await dialogStore.content<boolean>({
+    title: 'Từ vựng mới',
+    component: AdminVocabWordForm,
+    props: { setId: set.value.id, user: true },
+    widthClass: 'sm:max-w-2xl'
+  })
+  if (saved) await refresh()
+}
 
 // Study modes shown in the sidebar
 const modes = [
@@ -76,9 +108,20 @@ function selectMode(id: ModeId) {
     <div v-else-if="set" class="animate-fade-up">
       <AppBreadcrumb :items="[{ label: 'Học từ vựng', to: '/vocab-learning' }, { label: set.name }]" class="mb-4" />
 
-      <div class="mb-6">
-        <h1 class="text-2xl font-extrabold tracking-tight text-highlighted sm:text-3xl">{{ set.name }}</h1>
-        <p v-if="set.description" class="mt-1 text-sm text-muted sm:text-base">{{ set.description }}</p>
+      <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
+        <div class="min-w-0">
+          <h1 class="text-2xl font-extrabold tracking-tight text-highlighted sm:text-3xl">{{ set.name }}</h1>
+          <p v-if="set.description" class="mt-1 text-sm text-muted sm:text-base">{{ set.description }}</p>
+        </div>
+        <!-- Only for signed-in users; the backend decides whether they may edit this set -->
+        <UButton
+          v-if="authStore.isLoggedIn"
+          icon="i-lucide-plus"
+          class="shrink-0 transition duration-200 active:scale-95"
+          @click="openAddWord"
+        >
+          Thêm từ vựng
+        </UButton>
       </div>
 
       <div class="grid gap-6 lg:grid-cols-[14rem_1fr]">

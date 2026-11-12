@@ -45,6 +45,9 @@ function toggleReverse() {
   start()
 }
 start()
+// The questions are built from a copy of the words, so start a new round when the set changes
+// (e.g. a word was added while this view is open)
+watch(() => props.words, start)
 
 const current = computed(() => questions.value[index.value])
 const answered = computed(() => picked.value !== null)

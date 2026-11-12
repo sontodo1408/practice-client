@@ -3,10 +3,12 @@ import type { FormError, FormSubmitEvent } from '@nuxt/ui'
 import type { VocabWord, VocabWordPayload } from '~/types/vocab'
 
 // Create/edit form for a word inside a set, shown in a content dialog. Emits "close" with true after saving.
-const props = defineProps<{ setId: number, word?: VocabWord }>()
+// With "user" the word is saved through the user API (POST /vocab/word) instead of the admin one.
+const props = defineProps<{ setId: number, word?: VocabWord, user?: boolean }>()
 const emit = defineEmits<{ close: [saved?: boolean] }>()
 
-const api = useVocabAdminApi()
+const adminApi = useVocabAdminApi()
+const userApi = useVocabApi()
 
 const state = reactive<VocabWordPayload>({
   id: props.word?.id,
@@ -31,7 +33,9 @@ function validate(values: Partial<VocabWordPayload>): FormError[] {
 async function onSubmit(event: FormSubmitEvent<VocabWordPayload>) {
   loading.value = true
   try {
-    await api.saveWord({ ...event.data, id: props.word?.id, setId: props.setId })
+    const payload = { ...event.data, id: props.word?.id, setId: props.setId }
+    if (props.user) await userApi.saveWord(payload)
+    else await adminApi.saveWord(payload)
     emit('close', true)
   } catch (e) {
     if (!(e instanceof ApiError)) throw e

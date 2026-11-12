@@ -1,10 +1,6 @@
 <script setup lang="ts">
 // Public layout: header + centered content. No sign-in required to view.
-// Restore the user from the token cookie once on the client so the header shows the account state.
-const authStore = useAuthStore()
-onMounted(() => {
-  if (!authStore.isLoggedIn) useAuth().fetchMe()
-})
+// The signed-in user is restored globally by plugins/auth.ts, so nothing is loaded here.
 </script>
 
 <template>

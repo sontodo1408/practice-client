@@ -76,6 +76,13 @@ const studying = computed<UserSubject[]>(() => {
 
 // Load the full list once for the studying section; failures just leave that section empty
 async function loadCatalog() {
+  // With no search keyword the list loaded above is already the full catalog: reuse it instead of a second,
+  // identical request
+  if (!keyword.value && !loadError.value) {
+    catalog.value = allSubjects.value
+    loadingCatalog.value = false
+    return
+  }
   try {
     catalog.value = await api.listAll()
   } catch (e) {

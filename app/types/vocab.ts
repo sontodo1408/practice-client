@@ -15,6 +15,8 @@ export interface VocabSet {
 // Admin form payload for creating/updating a set (mirrors Java VocabSetCreateRequest; id set = update)
 export interface VocabSetPayload {
   id?: number
+  // Owner of the set; only sent by the user-facing create (POST /vocab/set), unused by the admin API
+  userId?: number
   name: string
   description: string
   imgBanner: string | null

@@ -14,6 +14,18 @@ const shuffled = ref(false)
 
 const current = computed(() => deck.value[index.value])
 
+// The set can change while this view is open (e.g. a word was added): the deck is a copy, so sync it.
+// Keep the current position and shuffled order; new words are appended, removed ones dropped.
+watch(() => props.words, (words) => {
+  if (shuffled.value) {
+    const known = new Set(deck.value.map(w => w.id))
+    deck.value = [...deck.value.map(w => words.find(n => n.id === w.id)).filter((w): w is VocabWord => !!w), ...words.filter(w => !known.has(w.id))]
+  } else {
+    deck.value = [...words]
+  }
+  if (index.value >= deck.value.length) index.value = Math.max(0, deck.value.length - 1)
+})
+
 // Move to another card; always show the first face of the new card
 function go(step: number) {
   const next = index.value + step

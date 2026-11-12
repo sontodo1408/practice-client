@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { VocabSet } from '~/types/vocab'
+// Imported explicitly: auto-imported components are only available in templates, not in script code
+import AdminVocabSetForm from '~/components/admin/VocabSetForm.vue'
 
 // Public vocabulary learning screen: same structure as the home screen (hero banner + titled grid of sets)
 definePageMeta({ layout: 'user' })
@@ -9,36 +11,60 @@ usePageSeo({
 })
 
 const api = useVocabApi()
+const authStore = useAuthStore()
+const dialogStore = useDialogStore()
 
-// Search text (debounced) is sent to the backend as ?keyword=
+// Signed-in users can create their own set; the owner id is sent so the backend registers it to them
+async function openCreateSet() {
+  const userId = authStore.user?.userId
+  if (userId === undefined) return
+  const saved = await dialogStore.content<boolean>({
+    title: 'Bộ từ vựng mới',
+    component: AdminVocabSetForm,
+    props: { userId }
+  })
+  if (saved) await refresh()
+}
+
+// Search text filters the loaded sets in the browser (the backend no longer searches by keyword)
 const search = ref('')
-const keyword = ref('')
-let timer: ReturnType<typeof setTimeout> | undefined
-watch(search, (value) => {
-  clearTimeout(timer)
-  timer = setTimeout(() => { keyword.value = value.trim() }, 250)
-})
-onBeforeUnmount(() => clearTimeout(timer))
+const keyword = computed(() => search.value.trim().toLowerCase())
 
-// Load on the server too; a failed request is shown inline (loadError) and never throws out of the page
+// Sets are loaded by the signed-in user's id (all sets when signed out). The user is already restored by
+// plugins/auth.ts (also on the server), so the list is requested once with the right id.
+// A failed request is shown inline (loadError) and never throws.
+const userId = computed(() => authStore.user?.userId)
+// The user id the current list was loaded for; lets us skip a reload when nothing really changed
+let loadedFor: number | undefined
 const { data, status, refresh } = await useAsyncData(
   'vocab-sets',
   async () => {
+    loadedFor = userId.value
     try {
-      return { sets: await api.listSets(keyword.value), error: '' }
+      return { sets: await api.listSets(loadedFor), error: '' }
     } catch (e) {
       if (!(e instanceof ApiError)) throw e
       return { sets: [] as VocabSet[], error: e.message }
     }
   },
-  { watch: [keyword], default: () => ({ sets: [] as VocabSet[], error: '' }) }
+  { default: () => ({ sets: [] as VocabSet[], error: '' }) }
 )
 
-const sets = computed(() => data.value.sets)
+// Reload only when the user really changes later (sign-in / sign-out in another tab or from the header)
+watch(userId, (id) => {
+  if (id !== loadedFor) refresh()
+})
+
+const allSets = computed(() => data.value.sets)
 const loadError = computed(() => data.value.error)
+// Local filter over name and description
+const sets = computed(() => {
+  if (!keyword.value) return allSets.value
+  return allSets.value.filter(s => [s.name, s.description ?? ''].some(f => f.toLowerCase().includes(keyword.value)))
+})
 const wordTotal = computed(() => sets.value.reduce((sum, s) => sum + (s.wordNum ?? 0), 0))
-// Only the first load shows skeletons; later searches keep cards on screen so they animate smoothly
-const loading = computed(() => status.value === 'pending' && !sets.value.length)
+// Only the first load shows skeletons; searching keeps cards on screen so they animate smoothly
+const loading = computed(() => status.value === 'pending' && !allSets.value.length)
 </script>
 
 <template>
@@ -98,13 +124,24 @@ const loading = computed(() => status.value === 'pending' && !sets.value.length)
     />
 
     <section v-else class="animate-fade-up">
-      <h2 class="mb-4 flex items-center gap-2 text-xl font-bold text-highlighted sm:text-2xl">
-        <span class="flex size-8 items-center justify-center rounded-lg bg-violet-100 text-violet-600 dark:bg-violet-950 dark:text-violet-400">
-          <UIcon name="i-lucide-library" class="size-5" />
-        </span>
-        Tất cả bộ từ vựng
-        <UBadge v-if="!loading && sets.length" :label="String(sets.length)" color="neutral" variant="subtle" size="sm" />
-      </h2>
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <h2 class="flex items-center gap-2 text-xl font-bold text-highlighted sm:text-2xl">
+          <span class="flex size-8 items-center justify-center rounded-lg bg-violet-100 text-violet-600 dark:bg-violet-950 dark:text-violet-400">
+            <UIcon name="i-lucide-library" class="size-5" />
+          </span>
+          Tất cả bộ từ vựng
+          <UBadge v-if="!loading && sets.length" :label="String(sets.length)" color="neutral" variant="subtle" size="sm" />
+        </h2>
+        <!-- Only for signed-in users -->
+        <UButton
+          v-if="authStore.isLoggedIn"
+          icon="i-lucide-plus"
+          class="shrink-0 transition duration-200 active:scale-95"
+          @click="openCreateSet"
+        >
+          Tạo bộ từ
+        </UButton>
+      </div>
 
       <!-- Loading: skeleton squares -->
       <div v-if="loading" class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">

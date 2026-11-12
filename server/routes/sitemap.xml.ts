@@ -1,6 +1,7 @@
 import type { ResponseApi } from '../../app/types/api'
 import type { TopicQuestion } from '../../app/types/question'
 import type { UserSubject } from '../../app/types/userSubject'
+import type { VocabSet } from '../../app/types/vocab'
 import { questionSlug } from '../../app/utils/format'
 
 // Dynamic sitemap: home, every subject and every question, built from the public API.
@@ -29,6 +30,15 @@ export default defineCachedEventHandler(async (event) => {
     })
   } catch {
     // Backend down: still serve the home entry so the sitemap stays valid
+  }
+
+  // Vocabulary: the list page and every set (no userId = all sets). Failure here must not break the rest.
+  try {
+    const sets = await get<VocabSet[]>('/practice/vocab/set')
+    urls.push(['/vocab-learning', '0.7'])
+    for (const s of sets) urls.push([`/vocab-learning/${s.slug}`, '0.6'])
+  } catch {
+    // Vocabulary API down: skip these entries
   }
 
   const body = urls
