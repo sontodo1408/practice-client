@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { VocabWord } from '~/types/vocab'
+import type { VocabFocus, VocabWord } from '~/types/vocab'
 
 // Flashcard mode: one card at a time that flips between two faces.
 // Front = word + phonetic, back = meaning + example. "Reverse" swaps which face is shown first; "Shuffle" randomizes the order.
-const props = defineProps<{ words: VocabWord[] }>()
+const props = defineProps<{ words: VocabWord[], focus?: VocabFocus | null }>()
 
 // Current order of the deck (original order until shuffled)
 const deck = ref<VocabWord[]>([...props.words])
@@ -24,6 +24,14 @@ watch(() => props.words, (words) => {
     deck.value = [...words]
   }
   if (index.value >= deck.value.length) index.value = Math.max(0, deck.value.length - 1)
+})
+
+// Search box on the page: jump to the requested word's card
+watch(() => props.focus, (f) => {
+  const i = f ? deck.value.findIndex(w => w.id === f.id) : -1
+  if (i < 0) return
+  index.value = i
+  flipped.value = false
 })
 
 // Move to another card; always show the first face of the new card

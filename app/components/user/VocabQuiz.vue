@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { VocabWord } from '~/types/vocab'
+import type { VocabFocus, VocabWord } from '~/types/vocab'
 
 // Study mode: multiple choice. The prompt is the word and the 4 answers are meanings (1 correct, 3 taken from
 // other words of the set). "Reverse" shows the meaning as the prompt and the words as answers.
-const props = defineProps<{ words: VocabWord[] }>()
+const props = defineProps<{ words: VocabWord[], focus?: VocabFocus | null }>()
 
 interface Question {
   word: VocabWord
@@ -48,6 +48,15 @@ start()
 // The questions are built from a copy of the words, so start a new round when the set changes
 // (e.g. a word was added while this view is open)
 watch(() => props.words, start)
+
+// Search box on the page: jump to the question of the requested word (also leaves the result screen)
+watch(() => props.focus, (f) => {
+  const i = f ? questions.value.findIndex(q => q.word.id === f.id) : -1
+  if (i < 0) return
+  index.value = i
+  picked.value = null
+  finished.value = false
+})
 
 const current = computed(() => questions.value[index.value])
 const answered = computed(() => picked.value !== null)

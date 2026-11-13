@@ -1,11 +1,33 @@
 <script setup lang="ts">
-import type { VocabWord } from '~/types/vocab'
+import type { VocabFocus, VocabWord } from '~/types/vocab'
 
 // Sentence mode: every word gets a text box to write a sentence with it.
 // "Gửi review" sends only the filled boxes to the AI (POST /ai/review/vocab) and shows its feedback below.
-const props = defineProps<{ words: VocabWord[] }>()
+const props = defineProps<{ words: VocabWord[], focus?: VocabFocus | null }>()
 
 const aiApi = useAiApi()
+
+// Only one page of words is shown (and reviewed) at a time
+const PAGE_SIZE = 10
+const page = ref(1)
+const pageWords = computed(() => props.words.slice((page.value - 1) * PAGE_SIZE, page.value * PAGE_SIZE))
+
+// Word briefly highlighted after a search
+const highlightId = ref<number | null>(null)
+let highlightTimer: ReturnType<typeof setTimeout> | undefined
+onBeforeUnmount(() => clearTimeout(highlightTimer))
+
+// Search box on the page: open the page that contains the word, then scroll to it
+watch(() => props.focus, async (f) => {
+  const i = f ? props.words.findIndex(w => w.id === f.id) : -1
+  if (!f || i < 0) return
+  page.value = Math.floor(i / PAGE_SIZE) + 1
+  highlightId.value = f.id
+  await nextTick()
+  document.getElementById(`vocab-sentence-${f.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  clearTimeout(highlightTimer)
+  highlightTimer = setTimeout(() => { highlightId.value = null }, 2000)
+})
 
 // Sentence typed for each word, keyed by word id
 const sentences = reactive<Record<number, string>>({})
@@ -13,8 +35,14 @@ const checking = ref(false)
 // AI feedback (Markdown); null until a review has been requested
 const feedback = ref<string | null>(null)
 
-// Words whose sentence is not blank, in the order of the list
-const filled = computed(() => props.words.filter(w => sentences[w.id]?.trim()))
+// Changing page drops the previous page's sentences and feedback, so only the visible page is ever submitted
+watch(page, () => {
+  for (const key of Object.keys(sentences)) delete sentences[Number(key)]
+  feedback.value = null
+})
+
+// Words on the current page whose sentence is not blank, in the order of the list
+const filled = computed(() => pageWords.value.filter(w => sentences[w.id]?.trim()))
 
 // Send the filled sentences; errors are shown by useApi's dialog, so only the spinner is reset here
 async function submit() {
@@ -42,9 +70,11 @@ async function submit() {
 
     <ul class="space-y-3">
       <li
-        v-for="(w, i) in words"
+        v-for="(w, i) in pageWords"
+        :id="`vocab-sentence-${w.id}`"
         :key="w.id"
-        class="animate-fade-up rounded-2xl border border-default bg-default p-4"
+        class="animate-fade-up rounded-2xl border bg-default p-4 transition-colors duration-500"
+        :class="highlightId === w.id ? 'border-primary ring-2 ring-primary/40' : 'border-default'"
         :style="{ '--index': Math.min(i, 8) }"
       >
         <div class="mb-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -65,6 +95,11 @@ async function submit() {
       </li>
     </ul>
 
+    <!-- Pagination: only shown when there is more than one page; moving page clears what was typed -->
+    <div v-if="words.length > PAGE_SIZE" class="flex justify-center">
+      <UPagination v-model:page="page" :items-per-page="PAGE_SIZE" :total="words.length" :disabled="checking" />
+    </div>
+
     <!-- AI feedback fades in once the review returns; the AI replies in Markdown -->
     <Transition
       enter-active-class="transition duration-300 ease-out motion-reduce:transition-none"
@@ -82,7 +117,7 @@ async function submit() {
 
     <!-- Sticky-free action row: count of sentences that will be sent + the submit button -->
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <span class="text-sm text-muted">Đã nhập {{ filled.length }} / {{ words.length }} câu</span>
+      <span class="text-sm text-muted">Đã nhập {{ filled.length }} / {{ pageWords.length }} câu</span>
       <UButton
         icon="i-lucide-send"
         :loading="checking"

@@ -68,6 +68,15 @@ export interface VocabSetDetail {
   slug: string
   description: string | null
   imgBanner: string | null
+  // Owner of the set; the page compares it with the signed-in user to decide who may add words
+  userId?: number | null
   // The backend leaves this null when a set has no words
   vocabWords: VocabWord[] | null
+}
+
+// Request from the search box on the set page to jump to a word; "n" changes on every request so searching
+// the same word twice still triggers the study modes
+export interface VocabFocus {
+  id: number
+  n: number
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { VocabSetDetail } from '~/types/vocab'
+import type { VocabFocus, VocabSetDetail } from '~/types/vocab'
 // Imported explicitly: auto-imported components are only available in templates, not in script code
 import AdminVocabWordForm from '~/components/admin/VocabWordForm.vue'
 
@@ -52,7 +52,13 @@ useHead({
   }]
 })
 
-// Signed-in users can add a word to this set; reload the set afterwards so the new word shows up
+// True only when a user is signed in and owns this set
+const isOwner = computed(() => {
+  const currentUserId = authStore.user?.userId
+  return currentUserId !== undefined && set.value?.userId != null && set.value.userId === currentUserId
+})
+
+// The owner can add a word to this set; reload the set afterwards so the new word shows up
 async function openAddWord() {
   if (!set.value) return
   const saved = await dialogStore.content<boolean>({
@@ -63,6 +69,47 @@ async function openAddWord() {
   })
   if (saved) await refresh()
 }
+
+// Search box: pick a word and every study mode jumps to it. The menu is reset after each pick so the same word can be searched again.
+// Big sets make a full dropdown slow, so: (1) the typed text is debounced, (2) the scan stops at the first
+// SEARCH_LIMIT matches and (3) only those matches are rendered (the menu's own filter is off via ignore-filter).
+const SEARCH_LIMIT = 10
+const SEARCH_DELAY = 300
+// Lowercased text to match against, computed once per set instead of on every keystroke
+const searchIndex = computed(() => words.value.map(w => ({
+  id: w.id,
+  label: `${w.word} — ${w.meaning}`,
+  key: `${w.word} ${w.meaning}`.toLowerCase()
+})))
+const searchTerm = ref('')
+const searchQuery = ref('')
+let searchTimer: ReturnType<typeof setTimeout> | undefined
+watch(searchTerm, (text) => {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => { searchQuery.value = text.trim().toLowerCase() }, SEARCH_DELAY)
+})
+onBeforeUnmount(() => clearTimeout(searchTimer))
+const searchItems = computed(() => {
+  const q = searchQuery.value
+  const found: { label: string, value: number }[] = []
+  if (!q) return found
+  for (const item of searchIndex.value) {
+    if (!item.key.includes(q)) continue
+    found.push({ label: item.label, value: item.id })
+    if (found.length >= SEARCH_LIMIT) break
+  }
+  return found
+})
+const searchValue = ref<number | undefined>()
+const focus = ref<VocabFocus | null>(null)
+watch(searchValue, (id) => {
+  if (id === undefined) return
+  focus.value = { id, n: Date.now() }
+  clearTimeout(searchTimer)
+  searchTerm.value = ''
+  searchQuery.value = ''
+  nextTick(() => { searchValue.value = undefined })
+})
 
 // Study modes shown in the sidebar
 const modes = [
@@ -113,15 +160,35 @@ function selectMode(id: ModeId) {
           <h1 class="text-2xl font-extrabold tracking-tight text-highlighted sm:text-3xl">{{ set.name }}</h1>
           <p v-if="set.description" class="mt-1 text-sm text-muted sm:text-base">{{ set.description }}</p>
         </div>
-        <!-- Only for signed-in users; the backend decides whether they may edit this set -->
-        <UButton
-          v-if="authStore.isLoggedIn"
-          icon="i-lucide-plus"
-          class="shrink-0 transition duration-200 active:scale-95"
-          @click="openAddWord"
-        >
-          Thêm từ vựng
-        </UButton>
+        <div class="flex w-full shrink-0 flex-wrap items-center gap-2 sm:w-auto">
+          <!-- Search a word of this set; the active study mode jumps to it -->
+          <UInputMenu
+            v-if="words.length"
+            v-model="searchValue"
+            v-model:search-term="searchTerm"
+            value-key="value"
+            :items="searchItems"
+            ignore-filter
+            :open-on-focus="false"
+            :open-on-click="false"
+            icon="i-lucide-search"
+            :ui="{ trailingIcon: 'hidden' }"
+            placeholder="Tìm từ vựng..."
+            aria-label="Tìm từ vựng trong bộ này"
+            class="w-full sm:w-64"
+          >
+            <template #empty>Không có từ phù hợp</template>
+          </UInputMenu>
+          <!-- Only the owner of the set sees this: the set's userId must match the signed-in user -->
+          <UButton
+            v-if="isOwner"
+            icon="i-lucide-plus"
+            class="shrink-0 transition duration-200 active:scale-95"
+            @click="openAddWord"
+          >
+            Thêm từ vựng
+          </UButton>
+        </div>
       </div>
 
       <div class="grid gap-6 lg:grid-cols-[14rem_1fr]">
@@ -154,9 +221,9 @@ function selectMode(id: ModeId) {
             <p class="text-sm text-muted">Bộ này chưa có từ vựng nào.</p>
           </div>
           <template v-else>
-            <UserVocabFlashcards v-if="mode === 'flashcard'" :key="`f-${set.id}`" :words="words" class="animate-fade-up" />
-            <UserVocabQuiz v-else-if="mode === 'study'" :key="`q-${set.id}`" :words="words" class="animate-fade-up" />
-            <UserVocabSentence v-else :key="`s-${set.id}`" :words="words" class="animate-fade-up" />
+            <UserVocabFlashcards v-if="mode === 'flashcard'" :key="`f-${set.id}`" :words="words" :focus="focus" class="animate-fade-up" />
+            <UserVocabQuiz v-else-if="mode === 'study'" :key="`q-${set.id}`" :words="words" :focus="focus" class="animate-fade-up" />
+            <UserVocabSentence v-else :key="`s-${set.id}`" :words="words" :focus="focus" class="animate-fade-up" />
           </template>
         </div>
       </div>
