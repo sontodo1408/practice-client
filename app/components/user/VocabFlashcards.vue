@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { VocabFocus, VocabWord } from '~/types/vocab'
+import { vocabTypeLabel } from '~/types/vocab'
 
 // Flashcard mode: one card at a time that flips between two faces.
 // Front = word + phonetic, back = meaning + example. "Reverse" swaps which face is shown first; "Shuffle" randomizes the order.
@@ -98,6 +99,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
           <template v-if="!reversed">
             <p class="text-3xl font-extrabold break-words text-highlighted sm:text-4xl">{{ current.word }}</p>
             <p v-if="current.phonetic" class="text-lg text-muted">{{ current.phonetic }}</p>
+            <UBadge v-if="current.wordType" :label="vocabTypeLabel(current.wordType)" color="primary" variant="subtle" />
           </template>
           <template v-else>
             <p class="text-2xl font-bold break-words text-highlighted sm:text-3xl">{{ current.meaning }}</p>
@@ -118,6 +120,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
           <template v-else>
             <p class="text-3xl font-extrabold break-words text-highlighted sm:text-4xl">{{ current.word }}</p>
             <p v-if="current.phonetic" class="text-lg text-muted">{{ current.phonetic }}</p>
+            <UBadge v-if="current.wordType" :label="vocabTypeLabel(current.wordType)" color="primary" variant="subtle" />
           </template>
           <span class="absolute bottom-4 text-xs text-dimmed">Nhấn để lật lại</span>
         </div>

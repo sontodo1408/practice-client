@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { VocabFocus, VocabWord } from '~/types/vocab'
+import { vocabTypeLabel } from '~/types/vocab'
 
 // Study mode: multiple choice. The prompt is the word and the 4 answers are meanings (1 correct, 3 taken from
 // other words of the set). "Reverse" shows the meaning as the prompt and the words as answers.
@@ -114,6 +115,7 @@ function optionClass(option: string) {
       <p class="text-xs font-semibold tracking-wide text-muted uppercase">{{ reversed ? 'Từ nào có nghĩa này?' : 'Nghĩa của từ' }}</p>
       <p class="mt-2 text-3xl font-extrabold break-words text-highlighted">{{ promptOf(current.word) }}</p>
       <p v-if="!reversed && current.word.phonetic" class="mt-1 text-muted">{{ current.word.phonetic }}</p>
+      <UBadge v-if="current.word.wordType" :label="vocabTypeLabel(current.word.wordType)" color="primary" variant="subtle" class="mt-2" />
     </div>
 
     <!-- 4 answers -->

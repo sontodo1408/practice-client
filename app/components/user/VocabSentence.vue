@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { VocabFocus, VocabWord } from '~/types/vocab'
+import { vocabTypeLabel } from '~/types/vocab'
 
 // Sentence mode: every word gets a text box to write a sentence with it.
 // "Gửi review" sends only the filled boxes to the AI (POST /ai/review/vocab) and shows its feedback below.
@@ -80,6 +81,7 @@ async function submit() {
         <div class="mb-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <span class="text-lg font-bold text-highlighted">{{ w.word }}</span>
           <span v-if="w.phonetic" class="text-sm text-muted">{{ w.phonetic }}</span>
+          <UBadge v-if="w.wordType" :label="vocabTypeLabel(w.wordType)" color="primary" variant="subtle" size="sm" />
           <UBadge v-if="w.wordLevel" :label="w.wordLevel" color="neutral" variant="subtle" size="sm" />
         </div>
         <p class="mb-2 text-sm text-muted">{{ w.meaning }}</p>

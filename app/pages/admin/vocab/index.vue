@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
 import type { VocabSet, VocabWord } from '~/types/vocab'
+import { vocabTypeLabel } from '~/types/vocab'
 // Imported explicitly: auto-imported components are only available in templates, not in script code
 import AdminVocabSetForm from '~/components/admin/VocabSetForm.vue'
 import AdminVocabWordForm from '~/components/admin/VocabWordForm.vue'
@@ -99,9 +100,6 @@ const wordColumns: TableColumn<VocabWord>[] = [
   { accessorKey: 'example', header: 'Ví dụ' },
   { id: 'actions', header: '' }
 ]
-
-// Readable label for a word type code (falls back to the raw code)
-const typeLabel = (type: string | null) => VOCAB_WORD_TYPES.find(t => t.value === type)?.label ?? type ?? '—'
 
 async function loadWords() {
   if (!selected.value) return
@@ -316,7 +314,7 @@ async function openWordForm(word?: VocabWord) {
             </div>
           </template>
           <template #wordType-cell="{ row }">
-            <span class="whitespace-nowrap text-muted">{{ typeLabel(row.original.wordType) }}</span>
+            <span class="whitespace-nowrap text-muted">{{ row.original.wordType ? vocabTypeLabel(row.original.wordType) : '—' }}</span>
           </template>
           <template #wordLevel-cell="{ row }">
             <UBadge v-if="row.original.wordLevel" color="neutral" variant="subtle" :label="row.original.wordLevel" />

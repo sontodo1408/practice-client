@@ -22,8 +22,8 @@ export interface VocabSetPayload {
   imgBanner: string | null
 }
 
-// Word type and CEFR level (mirror Java EWordType / EWordLevel; "ADB" is the backend spelling of adverb)
-export type VocabWordType = 'NOUN' | 'VERB' | 'ADJ' | 'ADB' | 'PREP' | 'CONJ'
+// Word type and CEFR level (mirror Java EWordType / EWordLevel; "ADV" is adverb)
+export type VocabWordType = 'NOUN' | 'VERB' | 'ADJ' | 'ADV' | 'PREP' | 'CONJ'
 export type VocabWordLevel = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2'
 
 // Word inside a set (mirrors Java VocabWordEntity)
@@ -52,13 +52,15 @@ export interface VocabWordPayload {
 
 // Select options shared by the word form and the word table
 export const VOCAB_WORD_TYPES: { label: string, value: VocabWordType }[] = [
-  { label: 'Danh từ', value: 'NOUN' },
-  { label: 'Động từ', value: 'VERB' },
-  { label: 'Tính từ', value: 'ADJ' },
-  { label: 'Trạng từ', value: 'ADB' },
-  { label: 'Giới từ', value: 'PREP' },
-  { label: 'Liên từ', value: 'CONJ' }
+  { label: 'Noun', value: 'NOUN' },
+  { label: 'Verb', value: 'VERB' },
+  { label: 'Adj', value: 'ADJ' },
+  { label: 'Adv', value: 'ADV' },
+  { label: 'Prep', value: 'PREP' },
+  { label: 'Conj', value: 'CONJ' }
 ]
+// Short label of a word type, e.g. "Adv"
+export const vocabTypeLabel = (type: VocabWordType) => VOCAB_WORD_TYPES.find(t => t.value === type)?.label
 export const VOCAB_WORD_LEVELS: VocabWordLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
 
 // Set with its words as returned by GET /vocab/set/{slug} (mirrors Java VocabSetDTO with vocabWords)
