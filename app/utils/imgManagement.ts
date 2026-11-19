@@ -23,6 +23,13 @@ const img = (group: string, file: string, name: string): Image => ({
 // Add new images here after copying the file into the matching folder (16:9, about 640x360, WebP)
 export const SUBJECT_IMAGE_GROUPS: ImageGroup[] = [
   {
+    key: 'general',
+    title: 'Chung',
+    images: [
+      img('general', 'img_golden_bean.png', 'Golden Bean')
+    ]
+  },
+  {
     key: 'banner',
     title: 'Banner',
     images: [
@@ -32,11 +39,6 @@ export const SUBJECT_IMAGE_GROUPS: ImageGroup[] = [
       img('banner', 'img_docker.png', 'Docker'),
       img('banner', 'img_jenkins.png', 'Jenkins')
     ]
-  },
-  {
-    key: 'public',
-    title: 'Chung',
-    images: []
   }
 ]
 

@@ -103,6 +103,16 @@ const userMenu = computed(() => [
       <div class="ml-auto flex shrink-0 items-center gap-1 sm:ml-0 sm:gap-2">
         <UColorModeButton />
 
+        <!-- Remaining beans (AI credits) -->
+        <div
+          v-if="authStore.isLoggedIn && authStore.beans !== null"
+          class="flex items-center gap-1 rounded-full bg-elevated px-2 py-1 text-sm font-semibold text-highlighted"
+          title="Số bean còn lại"
+        >
+          <img src="/imgs/general/img_golden_bean.png" alt="Bean" class="size-5 object-contain">
+          <span class="tabular-nums">{{ authStore.beans }}</span>
+        </div>
+
         <!-- Signed in: avatar menu -->
         <UDropdownMenu v-if="authStore.isLoggedIn" :items="userMenu" :content="{ align: 'end' }">
           <UButton color="neutral" variant="ghost" class="gap-2 active:scale-95">

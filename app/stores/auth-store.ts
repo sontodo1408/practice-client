@@ -11,14 +11,22 @@ export const useAuthStore = defineStore('auth', () => {
   const isLoggedIn = computed(() => user.value !== null)
   const isAdmin = computed(() => user.value?.role?.replace(/^ROLE_/i, '').toUpperCase() === ADMIN_ROLE)
 
+  // Beans (AI credits) the user has left, null until loaded. Refreshed by GET /home/beans and by every AI call.
+  const beans = ref<number | null>(null)
+
   function setUser(value: AuthUser | null) {
     user.value = value
+  }
+
+  function setBeans(value: number | null) {
+    beans.value = value
   }
 
   // Forget the user (e.g. on logout or 401)
   function clear() {
     user.value = null
+    beans.value = null
   }
 
-  return { user, isLoggedIn, isAdmin, setUser, clear }
+  return { user, beans, isLoggedIn, isAdmin, setUser, setBeans, clear }
 })
