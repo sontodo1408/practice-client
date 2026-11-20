@@ -76,7 +76,7 @@ onBeforeUnmount(clearTimer)
 
 // Send the learner's answer to the AI and show the result below the answer box
 async function check() {
-  if (!props.question || checking.value) return
+  if (!props.question || checking.value || !aiApi.ensureLoggedIn()) return
   checking.value = true
   try {
     clearTimer()

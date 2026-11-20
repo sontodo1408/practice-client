@@ -47,7 +47,7 @@ const filled = computed(() => pageWords.value.filter(w => sentences[w.id]?.trim(
 
 // Send the filled sentences; errors are shown by useApi's dialog, so only the spinner is reset here
 async function submit() {
-  if (!filled.value.length || checking.value) return
+  if (!filled.value.length || checking.value || !aiApi.ensureLoggedIn()) return
   checking.value = true
   try {
     feedback.value = await aiApi.reviewVocab(filled.value.map(w => ({ word: w.word, example: sentences[w.id]!.trim() })))

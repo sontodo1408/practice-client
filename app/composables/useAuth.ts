@@ -4,11 +4,13 @@ import type { AuthResponse, AuthUser, LoginPayload } from '~/types/auth'
 export function useAuth() {
   const api = useApi()
   const authStore = useAuthStore()
+  // Created up front: composables cannot be called after an await
+  const aiApi = useAiApi()
 
-  // GET /practice/home/beans: the remaining beans of the signed-in user. Fails quietly (the header just hides them).
+  // Load the remaining beans of the signed-in user. Fails quietly (the header just hides them).
   async function fetchBeans() {
     try {
-      authStore.setBeans(await api.get<number>('/practice/home/beans', { silent: true, skipAuthRedirect: true }))
+      authStore.setBeans(await aiApi.getBeans())
     } catch (e) {
       if (!(e instanceof ApiError)) throw e
     }

@@ -22,6 +22,8 @@ export interface AiReviewResponse {
 export function useAiApi() {
   const api = useApi()
   const authStore = useAuthStore()
+  // Resolved here (synchronously in setup) because composables cannot be called later from event handlers
+  const route = useRoute()
 
   // Returns the AI text and syncs the header's bean count with the remaining beans
   async function call(url: string, payload: unknown) {
@@ -30,7 +32,18 @@ export function useAiApi() {
     return result
   }
 
+  // AI costs beans, so it needs an account: guests are sent to the login page and come back here afterwards.
+  // Returns true when the caller may go on.
+  function ensureLoggedIn() {
+    if (authStore.isLoggedIn) return true
+    navigateTo(loginLocation(route.fullPath))
+    return false
+  }
+
   return {
+    ensureLoggedIn,
+    // GET /practice/ai/beans: remaining beans of the signed-in user (quiet: the header just hides them on failure)
+    getBeans: () => api.get<number>('/practice/ai/beans', { silent: true, skipAuthRedirect: true }),
     // POST /practice/ai/review: AI feedback (plain text) on the learner's answer.
     // Errors are shown by useApi's dialog; the caller only needs to stop its loading state.
     review: (payload: AiReviewRequest) => call('/practice/ai/review', payload),
