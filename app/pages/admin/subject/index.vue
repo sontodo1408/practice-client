@@ -25,6 +25,8 @@ const loading = computed(() => mounted.value && status.value === 'pending')
 
 // ---- Search + pagination (the list endpoint returns everything, so both run in the browser) ----
 const search = ref('')
+// Text typed in the box; it only becomes the active search when Enter is pressed
+const searchInput = ref('')
 const page = ref(1)
 const pageSize = 10
 
@@ -103,14 +105,15 @@ async function removeSubject(subject: Subject) {
       <!-- Toolbar: search + count -->
       <div class="flex flex-wrap items-center justify-between gap-3 border-b border-default p-4">
         <UInput
-          v-model="search"
+          v-model="searchInput"
+          @keydown.enter="search = searchInput"
           icon="i-lucide-search"
           placeholder="Tìm theo tên, slug hoặc mô tả"
           class="w-full sm:max-w-sm"
           aria-label="Tìm kiếm môn học"
         >
-          <template v-if="search" #trailing>
-            <UButton icon="i-lucide-x" color="neutral" variant="link" size="xs" aria-label="Xóa tìm kiếm" @click="search = ''" />
+          <template v-if="searchInput" #trailing>
+            <UButton icon="i-lucide-x" color="neutral" variant="link" size="xs" aria-label="Xóa tìm kiếm" @click="searchInput = ''; search = ''" />
           </template>
         </UInput>
         <span class="text-sm text-muted">{{ filtered.length }} môn học</span>

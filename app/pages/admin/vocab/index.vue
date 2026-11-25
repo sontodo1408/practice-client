@@ -27,6 +27,8 @@ const loading = computed(() => mounted.value && status.value === 'pending')
 
 // ---- Sets: search + pagination (the list endpoint returns everything, so both run in the browser) ----
 const search = ref('')
+// Text typed in the box; it only becomes the active search when Enter is pressed
+const searchInput = ref('')
 const page = ref(1)
 const pageSize = 10
 
@@ -85,6 +87,8 @@ const words = ref<VocabWord[]>([])
 const wordsLoading = ref(false)
 const wordsError = ref('')
 const wordSearch = ref('')
+// Text typed in the word box; applied to wordSearch on Enter only
+const wordSearchInput = ref('')
 
 const filteredWords = computed(() => {
   const q = wordSearch.value.trim().toLowerCase()
@@ -120,6 +124,7 @@ async function loadWords() {
 async function selectSet(set: VocabSet) {
   selected.value = set
   wordSearch.value = ''
+  wordSearchInput.value = ''
   await loadWords()
   await nextTick()
   document.getElementById('vocab-words')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -161,14 +166,15 @@ async function openWordForm(word?: VocabWord) {
       <!-- Toolbar: search + count -->
       <div class="flex flex-wrap items-center justify-between gap-3 border-b border-default p-4">
         <UInput
-          v-model="search"
+          v-model="searchInput"
+          @keydown.enter="search = searchInput"
           icon="i-lucide-search"
           placeholder="Tìm theo tên, slug hoặc mô tả"
           class="w-full sm:max-w-sm"
           aria-label="Tìm kiếm bộ từ vựng"
         >
-          <template v-if="search" #trailing>
-            <UButton icon="i-lucide-x" color="neutral" variant="link" size="xs" aria-label="Xóa tìm kiếm" @click="search = ''" />
+          <template v-if="searchInput" #trailing>
+            <UButton icon="i-lucide-x" color="neutral" variant="link" size="xs" aria-label="Xóa tìm kiếm" @click="searchInput = ''; search = ''" />
           </template>
         </UInput>
         <span class="text-sm text-muted">{{ filtered.length }} bộ từ vựng</span>
@@ -286,7 +292,8 @@ async function openWordForm(word?: VocabWord) {
         <!-- Word search -->
         <div class="border-b border-default p-4">
           <UInput
-            v-model="wordSearch"
+            v-model="wordSearchInput"
+            @keydown.enter="wordSearch = wordSearchInput"
             icon="i-lucide-search"
             placeholder="Tìm theo từ hoặc nghĩa"
             class="w-full sm:max-w-sm"

@@ -1,4 +1,7 @@
 <script setup lang="ts">
+// Imported explicitly: it is opened from script code, where auto-imported components are unavailable
+import PlansDialog from '~/components/user/PlansDialog.vue'
+
 // Public header: logo, centered search, theme toggle and account area (login button or user menu)
 const authStore = useAuthStore()
 const { logout } = useAuth()
@@ -25,6 +28,16 @@ function clearSearch() {
   onSearch()
 }
 onBeforeUnmount(() => clearTimeout(timer))
+
+// Open the plans comparison popup
+const dialogStore = useDialogStore()
+function openPlans() {
+  dialogStore.content({
+    title: 'Nâng cấp gói',
+    component: PlansDialog,
+    widthClass: 'sm:max-w-5xl'
+  })
+}
 
 // Prefer the full name, fall back to the username
 const userLabel = computed(() => {
@@ -104,14 +117,17 @@ const userMenu = computed(() => [
         <UColorModeButton />
 
         <!-- Remaining beans (AI credits) -->
-        <div
+        <!-- Clicking it opens the plans popup -->
+        <button
           v-if="authStore.isLoggedIn && authStore.beans !== null"
-          class="flex items-center gap-1 rounded-full bg-elevated px-2 py-1 text-sm font-semibold text-highlighted"
-          title="Số bean còn lại"
+          type="button"
+          class="flex items-center gap-1 rounded-full bg-elevated px-2 py-1 text-sm font-semibold text-highlighted transition duration-200 hover:bg-accented active:scale-95"
+          title="Số bean còn lại - bấm để xem các gói"
+          @click="openPlans"
         >
           <img src="/imgs/general/img_golden_bean.png" alt="Bean" class="size-5 object-contain">
           <span class="tabular-nums">{{ authStore.beans }}</span>
-        </div>
+        </button>
 
         <!-- Signed in: avatar menu -->
         <UDropdownMenu v-if="authStore.isLoggedIn" :items="userMenu" :content="{ align: 'end' }">

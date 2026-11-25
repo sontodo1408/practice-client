@@ -6,5 +6,6 @@ export const adminNavItems: NavigationMenuItem[] = [
   { label: 'Chủ đề', icon: 'i-lucide-list-tree', to: '/admin/topic' },
   { label: 'Câu hỏi', icon: 'i-lucide-circle-help', to: '/admin/question' },
   { label: 'Từ vựng', icon: 'i-lucide-languages', to: '/admin/vocab' },
+  { label: 'Người dùng', icon: 'i-lucide-users', to: '/admin/user' },
   { label: 'Cài đặt', icon: 'i-lucide-settings', to: '/admin/setting' }
 ]

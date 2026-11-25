@@ -13,6 +13,8 @@ const groups = SUBJECT_IMAGE_GROUPS
 
 const activeGroup = ref<string>(ALL)
 const search = ref('')
+// Text typed in the box; applied to search on Enter only
+const searchInput = ref('')
 const sort = ref<SortKey>('default')
 const current = ref<string | null>(props.selected ?? null)
 
@@ -70,9 +72,9 @@ function confirmSelection() {
     <!-- Toolbar + image grid -->
     <div class="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
       <div class="flex flex-wrap items-center gap-2">
-        <UInput v-model="search" icon="i-lucide-search" placeholder="Tìm ảnh theo tên" class="min-w-40 flex-1" aria-label="Tìm ảnh">
-          <template v-if="search" #trailing>
-            <UButton icon="i-lucide-x" color="neutral" variant="link" size="xs" aria-label="Xóa tìm kiếm" @click="search = ''" />
+        <UInput v-model="searchInput" icon="i-lucide-search" placeholder="Tìm ảnh theo tên" class="min-w-40 flex-1" aria-label="Tìm ảnh" @keydown.enter="search = searchInput">
+          <template v-if="searchInput" #trailing>
+            <UButton icon="i-lucide-x" color="neutral" variant="link" size="xs" aria-label="Xóa tìm kiếm" @click="searchInput = ''; search = ''" />
           </template>
         </UInput>
         <USelect v-model="sort" :items="sortItems" icon="i-lucide-arrow-down-up" class="w-40" aria-label="Sắp xếp" />
