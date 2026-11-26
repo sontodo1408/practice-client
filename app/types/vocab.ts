@@ -16,7 +16,7 @@ export interface VocabSet {
 export interface VocabSetPayload {
   id?: number
   // Owner of the set; only sent by the user-facing create (POST /vocab/set), unused by the admin API
-  userId?: number
+  userId?: string
   name: string
   description: string
   imgBanner: string | null
@@ -71,7 +71,7 @@ export interface VocabSetDetail {
   description: string | null
   imgBanner: string | null
   // Owner of the set; the page compares it with the signed-in user to decide who may add words
-  userId?: number | null
+  userId?: string | null
   // The backend leaves this null when a set has no words
   vocabWords: VocabWord[] | null
 }

@@ -10,7 +10,7 @@ export function useAdminUserApi() {
     search: (query: AdminUserSearchQuery) =>
       api.get<PageResponse<AdminUser>>(`${base}/search`, { query: { ...query } }),
     // The backend binds userId/beanLimit from the query string (no request body)
-    updateBeanLimit: (userId: number, beanLimit: number) =>
+    updateBeanLimit: (userId: string, beanLimit: number) =>
       api.put<void>(`${base}/bean-limit`, undefined, { query: { userId, beanLimit } })
   }
 }

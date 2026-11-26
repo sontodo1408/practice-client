@@ -35,7 +35,7 @@ const keyword = computed(() => search.value.trim().toLowerCase())
 // A failed request is shown inline (loadError) and never throws.
 const userId = computed(() => authStore.user?.userId)
 // The user id the current list was loaded for; lets us skip a reload when nothing really changed
-let loadedFor: number | undefined
+let loadedFor: string | undefined
 const { data, status, refresh } = await useAsyncData(
   'vocab-sets',
   async () => {

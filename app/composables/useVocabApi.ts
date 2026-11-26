@@ -9,7 +9,7 @@ export function useVocabApi() {
   return {
     // GET /practice/vocab/set?userId= : sets of that user. The backend returns every set when userId is null,
     // so an undefined id is simply left out of the query. Text search is done in the browser, not here.
-    listSets: (userId?: number) =>
+    listSets: (userId?: string) =>
       api.get<VocabSet[]>('/practice/vocab/set', { ...options, query: { userId } }),
     // GET /practice/vocab/set/{slug}: one set with all its words
     getSet: (slug: string) => api.get<VocabSetDetail>(`/practice/vocab/set/${slug}`, options),

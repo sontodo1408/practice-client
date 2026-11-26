@@ -6,7 +6,7 @@ export interface LoginPayload {
 
 // Signed-in user info (mirrors Java UserProfile); most fields can be null when the profile service has no data
 export interface AuthUser {
-  userId: number
+  userId: string
   username: string
   roleId: number
   role: string

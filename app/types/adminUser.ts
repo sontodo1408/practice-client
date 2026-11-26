@@ -1,6 +1,6 @@
 // One user row as returned by GET /practice/admin/user/search (mirrors Java UserSettingResponseDTO)
 export interface AdminUser {
-  userId: number
+  userId: string
   username: string
   firstName: string | null
   lastName: string | null
